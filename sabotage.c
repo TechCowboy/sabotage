@@ -209,6 +209,7 @@ int jet(int sprite_number, SPRITE_STATE info)
 {
     static bool fail_sprite_flag = true;
 
+    sprite_attributes[sprite_number].early_clock = info.going_left;
     sprite_attributes[sprite_number].sprite_pattern = info.going_left ? LJET_FRONT : JET_END;
 
     sprite_attributes[sprite_number].color_code = COLOR_BLACK;
@@ -216,19 +217,20 @@ int jet(int sprite_number, SPRITE_STATE info)
     sprite_attributes[sprite_number].x = info.x;
     sprite_attributes[sprite_number].y = info.y;
 
+    sprite_attributes[sprite_number + 1].early_clock = info.going_left;
     sprite_attributes[sprite_number + 1].sprite_pattern = info.going_left ? LJET_MID : JET_MID;
     sprite_attributes[sprite_number + 1].color_code = COLOR_BLACK;
 
     sprite_attributes[sprite_number + 1].x = info.x + 8;
     sprite_attributes[sprite_number + 1].y = info.y;
 
+    sprite_attributes[sprite_number + 2].early_clock = info.going_left;
     sprite_attributes[sprite_number + 2].sprite_pattern = info.going_left ? LJET_END : JET_FRONT;
     sprite_attributes[sprite_number + 2].color_code = COLOR_BLACK;
 
     sprite_attributes[sprite_number + 2].x = info.x + 16;
     sprite_attributes[sprite_number + 2].y = info.y;
 
-    fail_sprite_flag = !fail_sprite_flag;
 
     return 3; // 3 sprites used
 }
@@ -264,35 +266,33 @@ int shot(int sprite_number, SPRITE_STATE info)
     sprite_attributes[sprite_number].y = info.y;
 
 
-    fail_sprite_flag = !fail_sprite_flag;
 
     return 1;
 }
 
 int helicopter(int sprite_number, SPRITE_STATE info)
 {
-    static bool alternate = true;
+    int blade_right = info.flip;
+
+    // top
+    sprite_attributes[sprite_number].x = info.x;
+    sprite_attributes[sprite_number].y = info.y;
+    sprite_attributes[sprite_number].color_code = (blade_right) ? COLOR_WHITE : COLOR_TRANSPARENT;
+    sprite_attributes[sprite_number].sprite_pattern = CHOPTER_BLADE_LEFT;
+
+    sprite_attributes[sprite_number + 1].x = info.x + 8;
+    sprite_attributes[sprite_number + 1].y = info.y;
+    sprite_attributes[sprite_number + 1].color_code = COLOR_WHITE;
+    sprite_attributes[sprite_number + 1].sprite_pattern = (blade_right) ? CHOPTER_BLADE_RIGHT_MID : CHOPTER_BLADE_LEFT_MID;
+
+    sprite_attributes[sprite_number + 2].x = info.x + 16;
+    sprite_attributes[sprite_number + 2].y = info.y;
+    sprite_attributes[sprite_number + 2].color_code = (blade_right) ? COLOR_TRANSPARENT : COLOR_WHITE;
+    sprite_attributes[sprite_number + 2].sprite_pattern = CHOPTER_BLADE_RIGHT;
 
     if (info.going_left)
     {
-
-        // top
-        sprite_attributes[sprite_number].x = info.x;
-        sprite_attributes[sprite_number].y = info.y;
-        sprite_attributes[sprite_number].color_code = (alternate || info.x < 8) ? COLOR_TRANSPARENT : COLOR_WHITE;
-        sprite_attributes[sprite_number].sprite_pattern = CHOPTER_BLADE_LEFT;
-
-        sprite_attributes[sprite_number + 1].x = info.x + 8;
-        sprite_attributes[sprite_number + 1].y = info.y;
-        sprite_attributes[sprite_number + 1].color_code = (info.x+8 < 8) ? COLOR_TRANSPARENT : COLOR_WHITE;
         
-        sprite_attributes[sprite_number + 1].sprite_pattern = alternate ? CHOPTER_BLADE_RIGHT_MID : CHOPTER_BLADE_LEFT_MID;
-
-        sprite_attributes[sprite_number + 2].x = info.x + 16;
-        sprite_attributes[sprite_number + 2].y = info.y;
-        sprite_attributes[sprite_number + 2].color_code = (alternate || info.x+16 < 8) ? COLOR_WHITE : COLOR_TRANSPARENT;
-        sprite_attributes[sprite_number + 2].sprite_pattern = CHOPTER_BLADE_RIGHT;
-
         // mid
         sprite_attributes[sprite_number + 3].x = info.x;
         sprite_attributes[sprite_number + 3].y = info.y + 8;
@@ -307,32 +307,19 @@ int helicopter(int sprite_number, SPRITE_STATE info)
         sprite_attributes[sprite_number + 5].x = info.x + 16;
         sprite_attributes[sprite_number + 5].y = info.y + 8;
         sprite_attributes[sprite_number + 5].color_code = COLOR_WHITE;
-        sprite_attributes[sprite_number + 5].sprite_pattern = alternate ? LCHOPTER_ROTOR_UP : LCHOPTER_ROTOR_SIDE;
+        sprite_attributes[sprite_number + 5].sprite_pattern = (info.flip) ? LCHOPTER_ROTOR_UP : LCHOPTER_ROTOR_SIDE;
+        
     } 
     else
     {
-
-        // top
-        sprite_attributes[sprite_number].x = info.x;
-        sprite_attributes[sprite_number].y = info.y;
-        sprite_attributes[sprite_number].color_code = alternate ? COLOR_TRANSPARENT : COLOR_WHITE;
-        sprite_attributes[sprite_number].sprite_pattern = CHOPTER_BLADE_LEFT;
-
-        sprite_attributes[sprite_number + 1].x = info.x + 8;
-        sprite_attributes[sprite_number + 1].y = info.y;
-        sprite_attributes[sprite_number + 1].color_code = COLOR_WHITE;
-        sprite_attributes[sprite_number + 1].sprite_pattern = alternate ? CHOPTER_BLADE_RIGHT_MID : CHOPTER_BLADE_LEFT_MID;
-
-        sprite_attributes[sprite_number + 2].x = info.x + 16;
-        sprite_attributes[sprite_number + 2].y = info.y;
-        sprite_attributes[sprite_number + 2].color_code = alternate ? COLOR_WHITE : COLOR_TRANSPARENT;
-        sprite_attributes[sprite_number + 2].sprite_pattern = CHOPTER_BLADE_RIGHT;
+        // CORRECT
+ 
 
         // mid
         sprite_attributes[sprite_number + 3].x = info.x;
         sprite_attributes[sprite_number + 3].y = info.y + 8;
         sprite_attributes[sprite_number + 3].color_code = COLOR_WHITE;
-        sprite_attributes[sprite_number + 3].sprite_pattern = alternate ? CHOPTER_ROTOR_UP : CHOPTER_ROTOR_SIDE;
+        sprite_attributes[sprite_number + 3].sprite_pattern = (info.flip) ? CHOPTER_ROTOR_UP : CHOPTER_ROTOR_SIDE;
 
         sprite_attributes[sprite_number + 4].x = info.x + 8;
         sprite_attributes[sprite_number + 4].y = info.y + 8;
@@ -343,9 +330,9 @@ int helicopter(int sprite_number, SPRITE_STATE info)
         sprite_attributes[sprite_number + 5].y = info.y + 8;
         sprite_attributes[sprite_number + 5].color_code = COLOR_WHITE;
         sprite_attributes[sprite_number + 5].sprite_pattern = CHOPTER_FRONT;
+
     }
 
-    alternate = ! alternate;
 
     return 6;
 }
@@ -374,7 +361,7 @@ The first character is the top-left one, the second the one to the right of
 it. Character no. 32 the first character of the second row. There are three
 colour and three pattern tables. The character number is as follows:
 
-The first 8 rows: byte from PN + 000h
+The first  8 rows: byte from PN + 000h
 The middle 8 rows: byte from PN + 100h
 The bottom 8 rows: byte from PN + 200h
 
@@ -495,6 +482,7 @@ void main()
     bool left = false;
     for(int i=0; i<32; i++)
     {
+        hel_sprites[i].flip = rand() < 16384 ? true : false;
         hel_sprites[i].enable = false;
         hel_sprites[i].state = -1;
         hel_sprites[i].sprite = -1;
@@ -503,6 +491,7 @@ void main()
         hel_sprites[i].wait = my_rand();
         hel_sprites[i].y = SPRITE_TERMINATOR;
 
+        
         jet_sprites[i].enable = false;
         jet_sprites[i].state = -1;
         jet_sprites[i].sprite = -1;
@@ -511,6 +500,7 @@ void main()
         jet_sprites[i].wait = my_rand();
         jet_sprites[i].y = SPRITE_TERMINATOR;
 
+        man_sprites[i].flip = rand() < 16384 ? true : false;
         man_sprites[i].enable = false;
         man_sprites[i].state = -1;
         man_sprites[i].sprite = -1;
@@ -560,6 +550,8 @@ void main()
 
     int emergency_stop = 0;
 
+
+
     // *************PREPARE THIS WAVE
 
     int hel_pos = 16*2;
@@ -580,6 +572,8 @@ void main()
         hel_pos += 16;
 
     }
+
+
 
     int jet_pos = 0;
 
@@ -604,6 +598,7 @@ void main()
     {
         for (int repeat=0; repeat<2; repeat++)
         {
+            
             //direction = -direction;
             if (direction == 1)
             {
@@ -621,6 +616,7 @@ void main()
 
             for(int i=start; i != stop; i += inc)
             {
+                sprite_attributes[i].early_clock = 1;
                 if (hel_sprites[i].enable)
                 {
                     if (hel_sprites[i].state != -1)
@@ -743,6 +739,13 @@ void main()
 
             vwrite(sprite_attributes, VRAM_SPRITE_ATTRIBUTES, 32 * sizeof(SPRITE_ATTRIBUTE));
         } // for repeat
+
+        for(int i=0; i<32; i++)
+        {
+            hel_sprites[i].flip = ! hel_sprites[i].flip;
+            jet_sprites[i].flip = ! jet_sprites[i].flip;
+        }
+
      /*
         // CHECK HELICOPTER FOR COLLISONS
         int sprite_collision;
@@ -868,9 +871,9 @@ void main()
             if (hel_sprites[i].state != -1)
             {
                 if (hel_sprites[i].going_left)
-                    hel_sprites[i].x -= 2;
+                    hel_sprites[i].x -= 1;
                 else
-                    hel_sprites[i].x += 2;
+                    hel_sprites[i].x += 1;
             }
 
             if (jet_sprites[i].state != -1)

@@ -7,13 +7,15 @@
 #define CHUTE_RIGHT          1
 #define CHUTE_MAN            2
 #define GROUND_MAN           3
+
 #define CHUTE_LEFT_FAIL      4
 #define CHUTE_RIGHT_FAIL     5
 #define CHUTE_LEFT_FAIL2     6
 #define CHUTE_RIGHT_FAIL2    7
+
 #define CHOPTER_BLADE_LEFT   8
-#define CHOPTER_BLADE_LEFT_MID 9
-#define CHOPTER_BLADE_RIGHT_MID 10
+#define CHOPTER_BLADE_RIGHT_MID 9
+#define CHOPTER_BLADE_LEFT_MID 10
 #define CHOPTER_BLADE_RIGHT 11
 
 #define CHOPTER_ROTOR_UP    12
@@ -60,6 +62,7 @@ typedef struct
     int enable;
     int sprite;
     int state;
+    int flip;
     int x;
     int y;
     int drop_at;
