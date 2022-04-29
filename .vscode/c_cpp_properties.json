@@ -5,7 +5,8 @@
             "includePath": [
                 "${default}",
                 "~/Documents/Projects/z88dk/include",
-                "./src"
+                "./src",
+                "~/Documents/Projects/eoslib/src"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

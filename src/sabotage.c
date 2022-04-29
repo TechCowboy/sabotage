@@ -15,7 +15,7 @@
 #define MIN(x, y) x < y ? x : y
 #define MAX(x, y) x > y ? x : y
 
-#define my_rand(min, max) ((rand() % RAND_MAX)*(max-min)+ min)
+#define my_rand(min, max) (rand() % (max - min + 1)) + min
 
 #define OFF_SCREEN -1
 #define ON_SCREEN  0
@@ -570,10 +570,10 @@ void main()
                 //sprite_attributes[i].early_clock = 1;
                 if (hel_sprites[i].enable)
                 {
-                    if (hel_sprites[i].state != -1)
+                    if (hel_sprites[i].state == ON_SCREEN)
                     {
-                        //sprintf(title, "About to put hel[%d] pre-sprite %d", i, sprite);
-                        //debug(title,1);
+                        sprintf(title, "Putting hel[%d] pre-sprite %d", i, sprite);
+                        debug(title,i);
                         n = helicopter(sprite, hel_sprites[i]);
 
                         sprite += n;
@@ -586,12 +586,14 @@ void main()
                         //debug(title, 1);
                     } else
                     {
+                        sprintf(title, "waiting hel[%d]  %d", i, hel_sprites[i].appearance_wait);
+                        debug(title, i);
                         if (hel_sprites[i].appearance_wait > 0)
                         {
                             hel_sprites[i].appearance_wait--;
                         } else
                         {
-                            hel_sprites[i].state = 0;
+                            hel_sprites[i].state = ON_SCREEN;
                             hel_sprites[i].appearance_wait = 0;
                         }
 
@@ -625,7 +627,7 @@ void main()
                         }
                         else
                         {
-                            jet_sprites[i].state = 0;
+                            jet_sprites[i].state = ON_SCREEN;
                             jet_sprites[i].appearance_wait = 0;
                         }
 
