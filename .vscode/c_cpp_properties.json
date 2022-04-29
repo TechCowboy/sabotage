@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${default}",
-                "~/Documents/Projects/z88dk/include"
+                "~/Documents/Projects/z88dk/include",
+                "./src"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

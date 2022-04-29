@@ -67,7 +67,8 @@ typedef struct
     int y;
     int drop_at;
     int going_left;
-    int wait;
+    int jump_wait;
+    int appearance_wait;
     int jumpers;
     int bomb;
 

@@ -4,27 +4,13 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Z88DK Coleco ADAM c/asm Build",
+            "label": "make",
             "type": "shell",
-            "command": "zcc",
-            "args": [
-                "+coleco",
-                "-subtype=adam",
-                "-create-app",
-                "-pragma-need=ansiterminal",
-                "-pragma-define:ansicolumns=64",
-                "-pragma-redirect:CRT_FONT=_font_8x8_msx_system",
-                "-lndos",
-                "*.c",
-              //  "*.asm",
-                "-o",
-                "${fileDirname}/${workspaceFolderBasename}"
-            ],
+            "command": "make",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            },
-            "detail": "compiler: zcc"
+            }
         }
     ]
 }

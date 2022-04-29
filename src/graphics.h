@@ -8,8 +8,6 @@
 #define VRAM_SPRITE_TABLE 0x3c00           // (Length 256)
 #define VRAM_SPRITE_ATTRIBUTES 0x3d00      // (Length 128)
 
-void eos_write_vdp_register(unsigned char reg, unsigned char val);
-unsigned char eos_read_vdp_register(void);
 
 void clr(unsigned char c);
 void mode_text(void);

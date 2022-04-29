@@ -10,11 +10,25 @@
 #include "vdp_registers.h"
 #include "colorset.h"
 #include "graphics.h"
+#include "sound.h"
 
 #define MIN(x, y) x < y ? x : y
 #define MAX(x, y) x > y ? x : y
 
-unsigned char length_check[] = { "1234567890123456789012345678901234567890"};
+#define my_rand(min, max) ((rand() % RAND_MAX)*(max-min)+ min)
+
+#define OFF_SCREEN -1
+#define ON_SCREEN  0
+
+#define JUMPED 0
+#define JUMPED1 1
+#define JUMPED2 2
+#define JUMPED3 3
+#define FLOATING 4
+#define FALLING 5
+#define GROUNDED 6
+
+
 unsigned char title[80];
 
 
@@ -99,74 +113,59 @@ void create_text_turret(void)
     }
 }
 
-#define JUMPED 0
-#define JUMPED1 1
-#define JUMPED2 2
-#define JUMPED3 3
-#define FLOATING 4
-#define FALLING 5
-#define GROUNDED 6
+
 
 int parachuter(int sprite_number, SPRITE_STATE info)
 {
-    if (info.state == -1)
+    // parachut positions
+    sprite_attributes[sprite_number].color_code = COLOR_WHITE;
+    sprite_attributes[sprite_number].x = info.x;
+    sprite_attributes[sprite_number].y = info.y;
+
+    sprite_attributes[sprite_number + 1].color_code = COLOR_WHITE;
+    sprite_attributes[sprite_number + 1].x = info.x + 8;
+    sprite_attributes[sprite_number + 1].y = info.y;
+
+
+    if (info.state <= JUMPED3)
     {
-        // Nothing to do, move him off screen
-        int y1 = 200;
-        int x1 = 0;
-        for(int s= 0; s<3; s++)
-        {
-            sprite_attributes[s].x = x1;
-            sprite_attributes[s].y = y1;
-            x1 += 8;
-        }
+        // hide chutes
+        sprite_attributes[sprite_number].x     = info.x;
+        sprite_attributes[sprite_number].y     = 192 + 8;
+
+        sprite_attributes[sprite_number + 1].x = info.x + 8;
+        sprite_attributes[sprite_number + 1].y = 192 + 8;
+
     } else
     {
-
-        if (info.state <= JUMPED3)
+        // normal parachute
+        if (info.state == FLOATING)
         {
-            // hide chute
-            sprite_attributes[sprite_number].y     = 192 + 8;
-            sprite_attributes[sprite_number + 1].y = 192 + 8;
+            sprite_attributes[sprite_number].sprite_pattern     = CHUTE_LEFT;
 
-            sprite_attributes[sprite_number + 2].sprite_pattern = GROUND_MAN;
-            sprite_attributes[sprite_number + 2].color_code = COLOR_DARK_BLUE;
+            sprite_attributes[sprite_number + 1].sprite_pattern = CHUTE_RIGHT;
 
-            sprite_attributes[sprite_number + 2].x = info.x + 4;
-            sprite_attributes[sprite_number + 2].y = info.y;
-
-        } else
+        }
+        
+        // broken parachute
+        if (info.state == FALLING)
         {
-            // normal parachute
-            if (info.state == FLOATING)
-            {
-                sprite_attributes[sprite_number].sprite_pattern     = CHUTE_LEFT;
-                sprite_attributes[sprite_number + 1].sprite_pattern = CHUTE_RIGHT;
-                sprite_attributes[sprite_number + 2].sprite_pattern = CHUTE_MAN;
-            }
+            sprite_attributes[sprite_number].sprite_pattern     = info.flip ? CHUTE_LEFT_FAIL  : CHUTE_LEFT_FAIL2;
             
-            // broken parachute
-            if (info.state == FALLING)
-            {
-                sprite_attributes[sprite_number].sprite_pattern     = info.flip ? CHUTE_LEFT_FAIL  : CHUTE_LEFT_FAIL2;
-                sprite_attributes[sprite_number + 1].sprite_pattern = info.flip ? CHUTE_RIGHT_FAIL : CHUTE_RIGHT_FAIL2;
-                sprite_attributes[sprite_number + 2].sprite_pattern = GROUND_MAN;
-            }
+            sprite_attributes[sprite_number + 1].sprite_pattern = info.flip ? CHUTE_RIGHT_FAIL : CHUTE_RIGHT_FAIL2;
 
-            sprite_attributes[sprite_number].color_code     = COLOR_WHITE;
-            sprite_attributes[sprite_number].x = info.x;
-            sprite_attributes[sprite_number].y = info.y;
-
-            sprite_attributes[sprite_number + 1].color_code = COLOR_WHITE;
-            sprite_attributes[sprite_number + 1].x = info.x+8;
-            sprite_attributes[sprite_number + 1].y = info.y;
-
-            sprite_attributes[sprite_number + 2].color_code = COLOR_DARK_BLUE;
-            sprite_attributes[sprite_number + 2].x          = info.x + 4;
-            sprite_attributes[sprite_number + 2].y          = info.y + 8;
         }
 
+
+        // man position
+        sprite_attributes[sprite_number + 2].color_code = COLOR_DARK_BLUE;
+        sprite_attributes[sprite_number + 2].x          = info.x + 4;
+        sprite_attributes[sprite_number + 2].y          = info.y + 8;
+
+        sprite_attributes[sprite_number + 2].sprite_pattern = (info.state == FLOATING) ? CHUTE_MAN : GROUND_MAN;
     }
+
+
 
     //debug("after vwrite ");
 
@@ -252,17 +251,19 @@ int helicopter(int sprite_number, SPRITE_STATE info)
 
     if (info.going_left)
     {    
-        // mid
+        // left front
         sprite_attributes[sprite_number + 3].x = info.x;
         sprite_attributes[sprite_number + 3].y = info.y + 8;
         sprite_attributes[sprite_number + 3].color_code = COLOR_WHITE;
         sprite_attributes[sprite_number + 3].sprite_pattern = LCHOPTER_FRONT;
 
+        // left mid
         sprite_attributes[sprite_number + 4].x = info.x + 8;
         sprite_attributes[sprite_number + 4].y = info.y + 8;
         sprite_attributes[sprite_number + 4].color_code = COLOR_WHITE;
         sprite_attributes[sprite_number + 4].sprite_pattern = LCHOPTER_MID;
 
+        // left tail
         sprite_attributes[sprite_number + 5].x = info.x + 16;
         sprite_attributes[sprite_number + 5].y = info.y + 8;
         sprite_attributes[sprite_number + 5].color_code = COLOR_WHITE;
@@ -271,17 +272,19 @@ int helicopter(int sprite_number, SPRITE_STATE info)
     } 
     else
     {
-        // mid
+        // right tail
         sprite_attributes[sprite_number + 3].x = info.x;
         sprite_attributes[sprite_number + 3].y = info.y + 8;
         sprite_attributes[sprite_number + 3].color_code = COLOR_WHITE;
         sprite_attributes[sprite_number + 3].sprite_pattern = (info.flip) ? CHOPTER_ROTOR_UP : CHOPTER_ROTOR_SIDE;
 
+        // right mid
         sprite_attributes[sprite_number + 4].x = info.x + 8;
         sprite_attributes[sprite_number + 4].y = info.y + 8;
         sprite_attributes[sprite_number + 4].color_code = COLOR_WHITE;
         sprite_attributes[sprite_number + 4].sprite_pattern = CHOPTER_MID;
 
+        // right front
         sprite_attributes[sprite_number + 5].x = info.x + 16;
         sprite_attributes[sprite_number + 5].y = info.y + 8;
         sprite_attributes[sprite_number + 5].color_code = COLOR_WHITE;
@@ -410,13 +413,6 @@ int collision_detect(int sprite_number)
 
 
 
-int my_rand(void)
-{
-    int r = rand() % 10;
-
-    return r;
-}
-
 
 void main()
 {
@@ -434,25 +430,27 @@ void main()
     int left_start_x = 256 - 8 * 3;
 
     /******** INIT ******************/
+
+    sound_init();
     bool left = false;
     for(int i=0; i<32; i++)
     {
         hel_sprites[i].flip = rand() < 16384 ? true : false;
         hel_sprites[i].enable = false;
-        hel_sprites[i].state = -1;
+        hel_sprites[i].state = OFF_SCREEN;
         hel_sprites[i].sprite = -1;
         hel_sprites[i].jumpers = 1;
         hel_sprites[i].going_left = left;
-        hel_sprites[i].wait = my_rand();
+        hel_sprites[i].appearance_wait = my_rand(8, 256 - 8);
         hel_sprites[i].y = SPRITE_TERMINATOR;
 
         
         jet_sprites[i].enable = false;
-        jet_sprites[i].state = -1;
+        jet_sprites[i].state = OFF_SCREEN;
         jet_sprites[i].sprite = -1;
         jet_sprites[i].bomb = 1;
         jet_sprites[i].going_left = left;
-        jet_sprites[i].wait = my_rand();
+        jet_sprites[i].appearance_wait = my_rand(8, 256 - 8);
         jet_sprites[i].y = SPRITE_TERMINATOR;
 
         man_sprites[i].flip = rand() < 16384 ? true : false;
@@ -462,12 +460,12 @@ void main()
         man_sprites[i].y = SPRITE_TERMINATOR;
 
         shot_sprites[i].enable = false;
-        shot_sprites[i].state = -1;
+        shot_sprites[i].state = OFF_SCREEN;
         shot_sprites[i].sprite = -1;
         shot_sprites[i].y = SPRITE_TERMINATOR;
 
         bomb_sprites[i].enable = false;
-        bomb_sprites[i].state = -1;
+        bomb_sprites[i].state = OFF_SCREEN;
         bomb_sprites[i].sprite = -1;
         bomb_sprites[i].y = SPRITE_TERMINATOR;
 
@@ -507,12 +505,12 @@ void main()
 
     // *************PREPARE THIS WAVE
 
-    int hel_pos = 16*2;
+    int hel_pos = 16*3;
 
     for(int i=0; i<helicopters; i++)
     {
         hel_sprites[i].enable = true;
-        hel_sprites[i].state = -1;
+        hel_sprites[i].state = OFF_SCREEN;
         hel_sprites[i].jumpers = 1;
         
         if (hel_sprites[i].going_left)
@@ -521,9 +519,9 @@ void main()
             hel_sprites[i].x = right_start_x;
 
         hel_sprites[i].y = hel_pos;
-        hel_sprites[i].wait = my_rand()*3;
+        hel_sprites[i].appearance_wait = my_rand(8, 32);
+        hel_sprites[i].jump_wait = my_rand(8, 256-8);
         hel_pos += 16;
-
     }
 
 
@@ -533,14 +531,14 @@ void main()
     for (int i = 0; i < jets; i++)
     {
         jet_sprites[i].enable = true;
-        jet_sprites[i].state = -1;
+        jet_sprites[i].state = OFF_SCREEN;
         if (jet_sprites[i].going_left)
             jet_sprites[i].x = left_start_x;
         else
             jet_sprites[i].x = right_start_x;
 
         jet_sprites[i].y = jet_pos;
-        jet_sprites[i].wait = my_rand()*3;
+        jet_sprites[i].appearance_wait = my_rand(8, 32);
         jet_pos += 16;
     }
 
@@ -588,23 +586,23 @@ void main()
                         //debug(title, 1);
                     } else
                     {
-                        if (hel_sprites[i].wait > 0)
+                        if (hel_sprites[i].appearance_wait > 0)
                         {
-                            hel_sprites[i].wait--;
+                            hel_sprites[i].appearance_wait--;
                         } else
                         {
                             hel_sprites[i].state = 0;
-                            hel_sprites[i].wait = 0;
+                            hel_sprites[i].appearance_wait = 0;
                         }
 
-                        //sprintf(title, "hel[%d].state: %d wait %d  ", i, hel_sprites[i].state, hel_sprites[i].wait);
+                        //sprintf(title, "hel[%d].state: %d appearance_wait %d  ", i, hel_sprites[i].state, hel_sprites[i].appearance_wait);
                         //debug(title, 1);
                     }
                 }
 
                 if (jet_sprites[i].enable)
                 {
-                    if (jet_sprites[i].state != -1)
+                    if (jet_sprites[i].state == ON_SCREEN)
                     {
                         //sprintf(title, "about to put jet[%d] pre-sprite %d", i, sprite);
                         //debug(title,2);
@@ -621,23 +619,23 @@ void main()
                     }
                     else
                     {
-                        if (jet_sprites[i].wait > 0)
+                        if (jet_sprites[i].appearance_wait > 0)
                         {
-                            jet_sprites[i].wait--;
+                            jet_sprites[i].appearance_wait--;
                         }
                         else
                         {
                             jet_sprites[i].state = 0;
-                            jet_sprites[i].wait = 0;
+                            jet_sprites[i].appearance_wait = 0;
                         }
 
-                        //sprintf(title, "jet[%d].state: %d wait %d  ", i, jet_sprites[i].state, jet_sprites[i].wait);
+                        //sprintf(title, "jet[%d].state: %d appearance_wait %d  ", i, jet_sprites[i].state, jet_sprites[i].appearance_wait);
                         //debug(title, 2);
                     }
                 }
 
 
-                if (man_sprites[i].enable)
+                if (false) // man_sprites[i].enable)
                 {
                     //sprintf(title, "JUMPED (%d,%d) sprite %d", man_sprites[i].x, man_sprites[i].y, sprite);
                     //debug(title, 7);
@@ -646,7 +644,7 @@ void main()
                     
                     sprintf(title, "JUMPED (%d,%d) sprite %d n %d", man_sprites[i].x, man_sprites[i].y, sprite, n);
                     debug(title, 7);
-                    getchar();
+                    //getchar();
 
                     sprite += n;
                     if (sprite >= 31)
@@ -659,14 +657,13 @@ void main()
                     //debug(title, 3);
                 }
 
-
-                if (shot_sprites[i].state != -1)
+                if (shot_sprites[i].state == ON_SCREEN)
                 {
                     // n = shots(&shot_sprites[i].sprite, shot_sprites[i].x, shot_sprites[i].y);
                     // sprites += n
                 }
 
-                if (bomb_sprites[i].state != -1)
+                if (bomb_sprites[i].state == ON_SCREEN)
                 {
                     // n = bomb(&bomb_sprites[i].sprite, bomb_sprites[i].x, bomb_sprites[i].y);
                     // sprites += n
@@ -682,13 +679,16 @@ void main()
             //debug(title, 20);
             //getchar();
 
-            vwrite(sprite_attributes, VRAM_SPRITE_ATTRIBUTES, 32 * sizeof(SPRITE_ATTRIBUTE));
+            vwrite(sprite_attributes, VRAM_SPRITE_ATTRIBUTES, (sprite+1) * sizeof(SPRITE_ATTRIBUTE));
+
+            
         } // for repeat
 
         for(int i=0; i<32; i++)
         {
             hel_sprites[i].flip = ! hel_sprites[i].flip;
             jet_sprites[i].flip = ! jet_sprites[i].flip;
+            man_sprites[i].flip = ! man_sprites[i].flip;
         }
 
      /*
@@ -696,10 +696,10 @@ void main()
         int sprite_collision;
         for (int i=0; i<32; i++)
         {
-            if (hel_sprites[i].sprite == -1)
+            if (hel_sprites[i].sprite == OFF_SCREEN)
                 break;
             sprite_collision = collision_detect(hel_sprites[i].sprite);
-            if (sprite_collision != -1)
+            if (sprite_collision != OFF_SCREEN)
             {
                 // dead
             }
@@ -708,11 +708,11 @@ void main()
         // CHECK FOR JET COLLISIONS
         for (int i = 0; i < 32; i++)
         {
-            if (jet_sprites[i].sprite == -1)
+            if (jet_sprites[i].sprite == OFF_SCREEN)
                 break;
 
             sprite_collision = collision_detect(jet_sprites[i].sprite);
-            if (sprite_collision != -1)
+            if (sprite_collision != OFF_SCREEN)
             {
                 // dead
             }
@@ -720,22 +720,33 @@ void main()
 */
 
         // SEE IF IT'S TIME TO DROP A MAN
+        int add_man;
         for (int i=0; i<32; i++)
         {
+            add_man = 0;
             if (hel_sprites[i].enable && (hel_sprites[i].jumpers > 0))
             {
-                if (   (! hel_sprites[i].going_left && (hel_sprites[i].x > hel_sprites[i].drop_at))
-                    || (  hel_sprites[i].going_left && (hel_sprites[i].x < hel_sprites[i].drop_at)))
-                {   
+                man_sprites[i].jump_wait--;
+                if (man_sprites[i].jump_wait <= 0)
+                {
+                    add_man = 1;
                     hel_sprites[i].jumpers--;
-
+                    if (hel_sprites[i].jumpers > 0)
+                    {
+                        hel_sprites[i].jump_wait = my_rand(10, 50);
+                    }
+                    else
+                    {
+                        hel_sprites[i].jump_wait = 0;
+                    }
+                }
+                if (add_man)
+                {   
                     man_sprites[men].enable = true;
                     man_sprites[men].x = hel_sprites[i].x;
                     man_sprites[men].x = hel_sprites[i].y+20;
                     man_sprites[men].state = JUMPED;
                     men++;
-
-                    emergency_stop = 1;
                 }
             }
         }
@@ -746,10 +757,10 @@ void main()
 
         for (int i=0; i<32; i++)
         {
-            if (man_sprites[i].state != -1)
+            if (man_sprites[i].state != OFF_SCREEN)
             {
                 sprite_collision = collision_detect(man_sprites[i].state);
-                if (sprite_collision != -1)
+                if (sprite_collision != OFF_SCREEN)
                 {
                     man_sprites[i].state = FALLING;
 
@@ -757,7 +768,7 @@ void main()
                     {
                         if (hel_sprites[h].sprite == sprite_collision)
                         {
-                            hel_sprites[h].sprite = -1;
+                            hel_sprites[h].sprite = OFF_SCREEN;
                             if (hel_sprites[h].going_left)
                                 hel_sprites[h].x = left_start_x;
                             else
@@ -766,7 +777,7 @@ void main()
 
                         if (jet_sprites[h].sprite == sprite_collision)
                         {
-                            jet_sprites[h].sprite = -1;
+                            jet_sprites[h].sprite = OFF_SCREEN;
                             if (jet_sprites[h].going_left)
                                 jet_sprites[h].x = left_start_x;
                             else
@@ -780,6 +791,7 @@ void main()
             
         }
         */
+       /*
 
         // MOVE THE MEN
         for(int i=0; i<-32; i++)
@@ -798,7 +810,7 @@ void main()
             if (man_sprites[i].y > 192 - 16)
             {
                 man_sprites[i].enable = false;
-                man_sprites[i].state = -1;
+                man_sprites[i].state = OFF_SCREEN;
                 int char_x;
                 int char_y;
                 man_sprites[i].y += 8;
@@ -809,11 +821,11 @@ void main()
                 //vpoke(VRAM_NAME_TABLE + char_y * total_columns + char_x + 1, CHAR_MAN);
             }
         }
-
+*/
         // MOVE THE HELICOPTERS AND JETS
         for (int i = 0; i < 32; i++)
         {
-            if (hel_sprites[i].state != -1)
+            if (hel_sprites[i].state == ON_SCREEN)
             {
                 if (hel_sprites[i].going_left)
                     hel_sprites[i].x -= 1;
@@ -821,12 +833,12 @@ void main()
                     hel_sprites[i].x += 1;
             }
 
-            if (jet_sprites[i].state != -1)
+            if (jet_sprites[i].state == ON_SCREEN)
             {
                 if (jet_sprites[i].going_left)
-                    jet_sprites[i].x -= 2;
+                    jet_sprites[i].x -= 4;
                 else
-                    jet_sprites[i].x += 2;
+                    jet_sprites[i].x += 4;
             }
         }
 

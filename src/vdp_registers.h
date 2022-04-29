@@ -92,30 +92,30 @@ typedef union _TMS_STATUS
 {
     struct 
     {
-        unsigned char interrupt_flag:1;
-        unsigned char coincidence_flag:1;
-        unsigned char fifth_sprite:5
+        unsigned char interrupt_flag   : 1;
+        unsigned char coincidence_flag : 1;
+        unsigned char fifth_sprite     : 5
     };
     unsigned char status;
     
 } TMS_STATUS;
 
 // Registers 0 through 7 are Write Only
-#define MASK_R0_M3 0b00000010
-#define MASK_R0_VDP_ENABLE 0b00000001
+#define MASK_R0_M3                     0b00000010
+#define MASK_R0_VDP_ENABLE             0b00000001
 
-#define MASK_R1_16K 0b10000000
-#define MASK_R1_BLANK 0b01000000 // Clear bit to blank screen
-#define MASK_R1_INTERRUPT 0b00100000
-#define MASK_R1_M1 0b00010000
-#define MASK_R1_M2 0b00001000
-#define MASK_R1_SPRITE_SIZE 0b00000010
-#define MASK_R1_SPRITE_MAGNIFY 0b00000001
+#define MASK_R1_16K                    0b10000000
+#define MASK_R1_BLANK                  0b01000000 // Clear bit to blank screen
+#define MASK_R1_INTERRUPT              0b00100000
+#define MASK_R1_M1                     0b00010000
+#define MASK_R1_M2                     0b00001000
+#define MASK_R1_SPRITE_SIZE            0b00000010
+#define MASK_R1_SPRITE_MAGNIFY         0b00000001
 
 // Only status is read only
-#define MASK_VSTATUS_VERTICAL_BLANK 0b10000000
-#define MASK_VSTATUS_SPRITE_COLLIDE 0b01000000
+#define MASK_VSTATUS_VERTICAL_BLANK    0b10000000
+#define MASK_VSTATUS_SPRITE_COLLIDE    0b01000000
 #define MASK_VSTATUS_FIFTH_SPRITE_FLAG 0b00100000
-#define MASK_VSTATUS_FIFTH_SPRITE_NUM 0b00011111
+#define MASK_VSTATUS_FIFTH_SPRITE_NUM  0b00011111
 
 #endif

@@ -1,55 +1,13 @@
 #include <msx.h>
 #include <msx/gfx.h>
-#include <arch/z80.h>
-#include "graphics.h"
-#include "colorset.h"
-#include "spriteset.h"
-#include "vdp_registers.h"
-#include "charset.h"
+#include "src/graphics.h"
+#include "src/colorset.h"
+#include "src/spriteset.h"
+#include "src/vdp_registers.h"
+#include "src/charset.h"
 
 int total_columns, total_rows;
 
-void eos_write_vdp_register(unsigned char reg, unsigned char val)
-{
-    Z80_registers r;
-
-    // 1370   ;   Name:                 WRITE_REGISTER
-    // 1371   ;
-    // 1372   ;   Function:             Writes a data byte vaiue to a desired VDP register
-    // 1373   ;
-    // 1374   ;   Entry:                B - register number to write to
-    // 1375   ;                         C - data byte value to be written
-    // 1376   ;
-    // 1377   ;   Exit:                 if register number = 0 or 1, the  respective byte
-    // 1378   ;                         of the VDP_MODE_WORD is updated.
-    // 1379   ;
-    // 1380   ;   Registers     used:   A,BC,E
-
-    r.Bytes.B = reg;
-    r.Bytes.C = val;
-
-    AsmCall(0xFD20, &r, REGS_ALL, REGS_ALL);
-}
-
-unsigned char eos_read_vdp_register(void)
-{
-    Z80_registers r;
-
-    // 1416  ;     Name :                READ_REGISTER
-    // 1417  ;
-    // 1418  ;     Function:             Reads a data byte value from the Colecovision CTRL_PORT.
-    // 1419  ;
-    // 1420  ;     Entry:                None.
-    // 1421  ;
-    // 1422  ;     Exit:                 A  -  data byte value read in
-    // 1423  ;
-    // 1424  ;     Registers used:       A,C
-    // 1425  ;
-
-    AsmCall(0xFD23, &r, REGS_ALL, REGS_ALL);
-
-    return r.Bytes.A;
-}
 
 void clr(unsigned char fillchar)
 {
