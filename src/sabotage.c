@@ -177,7 +177,6 @@ int jet(int sprite_number, SPRITE_STATE info)
 {
     static bool fail_sprite_flag = true;
 
-    //sprite_attributes[sprite_number].early_clock = info.going_left;
     sprite_attributes[sprite_number].sprite_pattern = info.going_left ? LJET_FRONT : JET_END;
 
     sprite_attributes[sprite_number].color_code = COLOR_BLACK;
@@ -185,14 +184,12 @@ int jet(int sprite_number, SPRITE_STATE info)
     sprite_attributes[sprite_number].x = info.x;
     sprite_attributes[sprite_number].y = info.y;
 
-    //sprite_attributes[sprite_number + 1].early_clock = info.going_left;
     sprite_attributes[sprite_number + 1].sprite_pattern = info.going_left ? LJET_MID : JET_MID;
     sprite_attributes[sprite_number + 1].color_code = COLOR_BLACK;
 
     sprite_attributes[sprite_number + 1].x = info.x + 8;
     sprite_attributes[sprite_number + 1].y = info.y;
 
-    //sprite_attributes[sprite_number + 2].early_clock = info.going_left;
     sprite_attributes[sprite_number + 2].sprite_pattern = info.going_left ? LJET_END : JET_FRONT;
     sprite_attributes[sprite_number + 2].color_code = COLOR_BLACK;
 
@@ -547,9 +544,11 @@ void main()
     int start, stop, inc;
     for (;;)
     {
+        for(int i = 0; i<32; i++)
+            sprite_attributes[i].y = SPRITE_TERMINATOR;
+
         //for (int repeat=0; repeat<2; repeat++)
-        {
-            
+        {   
             //direction = -direction;
             if (direction == 1)
             {
@@ -567,7 +566,6 @@ void main()
 
             for(int i=start; i != stop; i += inc)
             {
-                //sprite_attributes[i].early_clock = 1;
                 if (hel_sprites[i].enable)
                 {
                     if (hel_sprites[i].state == ON_SCREEN)
@@ -673,15 +671,12 @@ void main()
 
             }
 
-            if (sprite < 31)
-                sprite_attributes[sprite+1].y = SPRITE_TERMINATOR;
-
 
             //sprintf(title, "total sprites#:%d   ", sprite);
             //debug(title, 20);
             //getchar();
 
-            vwrite(sprite_attributes, VRAM_SPRITE_ATTRIBUTES, (sprite+1) * sizeof(SPRITE_ATTRIBUTE));
+            vwrite(sprite_attributes, VRAM_SPRITE_ATTRIBUTES, 32 * sizeof(SPRITE_ATTRIBUTE));
 
             
         } // for repeat
@@ -824,6 +819,50 @@ void main()
             }
         }
 */
+
+        for (int i = 0; i < 32; i++)
+        {
+            if (hel_sprites[i].state == ON_SCREEN)
+            {
+                if (hel_sprites[i].going_left)
+                {
+                    if (hel_sprites[i].x <= 0)
+                    {
+                        hel_sprites[i].state == OFF_SCREEN;
+                        hel_sprites[i].enable = false;
+                    }
+                } else
+                {
+                    if (hel_sprites[i].x >= 256-24)
+                    {
+                        hel_sprites[i].state == OFF_SCREEN;
+                        hel_sprites[i].enable = false;
+                    }
+                }
+            }
+
+            if (jet_sprites[i].state == ON_SCREEN)
+            {
+                if (jet_sprites[i].going_left)
+                {
+                    if (jet_sprites[i].x <= 0)
+                    {
+                        jet_sprites[i].state == OFF_SCREEN;
+                        jet_sprites[i].enable = false;
+                    }
+                }
+                else
+                {
+                    if (jet_sprites[i].x >= 256 - 24)
+                    {
+                        jet_sprites[i].state == OFF_SCREEN;
+                        jet_sprites[i].enable = false;
+                    }
+                }
+            }
+        }
+
+
         // MOVE THE HELICOPTERS AND JETS
         for (int i = 0; i < 32; i++)
         {
