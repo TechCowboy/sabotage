@@ -109,10 +109,9 @@ void create_text_turret(void)
 
 int parachuter(int sprite_number, SPRITE_STATE info)
 {
-    static bool fail_sprite_flag = false;
-
     if (info.state == -1)
     {
+        // Nothing to do, move him off screen
         int y1 = 200;
         int x1 = 0;
         for(int s= 0; s<3; s++)
@@ -149,8 +148,8 @@ int parachuter(int sprite_number, SPRITE_STATE info)
             // broken parachute
             if (info.state == FALLING)
             {
-                sprite_attributes[sprite_number].sprite_pattern     = fail_sprite_flag ? CHUTE_LEFT_FAIL  : CHUTE_LEFT_FAIL2;
-                sprite_attributes[sprite_number + 1].sprite_pattern = fail_sprite_flag ? CHUTE_RIGHT_FAIL : CHUTE_RIGHT_FAIL2;
+                sprite_attributes[sprite_number].sprite_pattern     = info.flip ? CHUTE_LEFT_FAIL  : CHUTE_LEFT_FAIL2;
+                sprite_attributes[sprite_number + 1].sprite_pattern = info.flip ? CHUTE_RIGHT_FAIL : CHUTE_RIGHT_FAIL2;
                 sprite_attributes[sprite_number + 2].sprite_pattern = GROUND_MAN;
             }
 
@@ -170,46 +169,16 @@ int parachuter(int sprite_number, SPRITE_STATE info)
     }
 
     //debug("after vwrite ");
-    fail_sprite_flag = !fail_sprite_flag;
 
     return 3; // 3 sprites used
 }
 
-
-int parachuter_crash(int sprite_number, SPRITE_STATE info)
-{
-    static bool fail_sprite_flag = true;
-
-    sprite_attributes[sprite_number].sprite_pattern = fail_sprite_flag ? CHUTE_LEFT_FAIL : CHUTE_LEFT_FAIL2;
-
-    sprite_attributes[sprite_number].color_code = COLOR_DARK_RED;
-
-    sprite_attributes[sprite_number].x = info.x;
-    sprite_attributes[sprite_number].y = info.y;
-
-    sprite_attributes[sprite_number + 1].sprite_pattern = fail_sprite_flag ? CHUTE_RIGHT_FAIL : CHUTE_RIGHT_FAIL2;
-    sprite_attributes[sprite_number + 1].color_code = COLOR_DARK_RED;
-
-    sprite_attributes[sprite_number + 1].x = info.x + 8;
-    sprite_attributes[sprite_number + 1].y = info.y;
-
-    sprite_attributes[sprite_number + 2].sprite_pattern = CHUTE_MAN;
-    sprite_attributes[sprite_number + 2].color_code = COLOR_DARK_RED;
-
-    sprite_attributes[sprite_number + 2].x = info.x + 4;
-    sprite_attributes[sprite_number + 2].y = info.y + 8;
-
-
-    fail_sprite_flag = !fail_sprite_flag;
-
-    return 3; // 3 sprites used
-}
 
 int jet(int sprite_number, SPRITE_STATE info)
 {
     static bool fail_sprite_flag = true;
 
-    sprite_attributes[sprite_number].early_clock = info.going_left;
+    //sprite_attributes[sprite_number].early_clock = info.going_left;
     sprite_attributes[sprite_number].sprite_pattern = info.going_left ? LJET_FRONT : JET_END;
 
     sprite_attributes[sprite_number].color_code = COLOR_BLACK;
@@ -217,20 +186,19 @@ int jet(int sprite_number, SPRITE_STATE info)
     sprite_attributes[sprite_number].x = info.x;
     sprite_attributes[sprite_number].y = info.y;
 
-    sprite_attributes[sprite_number + 1].early_clock = info.going_left;
+    //sprite_attributes[sprite_number + 1].early_clock = info.going_left;
     sprite_attributes[sprite_number + 1].sprite_pattern = info.going_left ? LJET_MID : JET_MID;
     sprite_attributes[sprite_number + 1].color_code = COLOR_BLACK;
 
     sprite_attributes[sprite_number + 1].x = info.x + 8;
     sprite_attributes[sprite_number + 1].y = info.y;
 
-    sprite_attributes[sprite_number + 2].early_clock = info.going_left;
+    //sprite_attributes[sprite_number + 2].early_clock = info.going_left;
     sprite_attributes[sprite_number + 2].sprite_pattern = info.going_left ? LJET_END : JET_FRONT;
     sprite_attributes[sprite_number + 2].color_code = COLOR_BLACK;
 
     sprite_attributes[sprite_number + 2].x = info.x + 16;
     sprite_attributes[sprite_number + 2].y = info.y;
-
 
     return 3; // 3 sprites used
 }
@@ -238,8 +206,6 @@ int jet(int sprite_number, SPRITE_STATE info)
 
 int bomb(int sprite_number, SPRITE_STATE info)
 {
-    static bool fail_sprite_flag = true;
-
 
     sprite_attributes[sprite_number].sprite_pattern = BOMB;
 
@@ -248,24 +214,18 @@ int bomb(int sprite_number, SPRITE_STATE info)
     sprite_attributes[sprite_number].x = info.x;
     sprite_attributes[sprite_number].y = info.y;
 
-    fail_sprite_flag = !fail_sprite_flag;
 
     return 1;
 }
 
 int shot(int sprite_number, SPRITE_STATE info)
 {
-    static bool fail_sprite_flag = true;
-
-
     sprite_attributes[sprite_number].sprite_pattern = SHOT;
 
     sprite_attributes[sprite_number].color_code = COLOR_MAGENTA;
 
     sprite_attributes[sprite_number].x = info.x;
     sprite_attributes[sprite_number].y = info.y;
-
-
 
     return 1;
 }
@@ -291,8 +251,7 @@ int helicopter(int sprite_number, SPRITE_STATE info)
     sprite_attributes[sprite_number + 2].sprite_pattern = CHOPTER_BLADE_RIGHT;
 
     if (info.going_left)
-    {
-        
+    {    
         // mid
         sprite_attributes[sprite_number + 3].x = info.x;
         sprite_attributes[sprite_number + 3].y = info.y + 8;
@@ -312,9 +271,6 @@ int helicopter(int sprite_number, SPRITE_STATE info)
     } 
     else
     {
-        // CORRECT
- 
-
         // mid
         sprite_attributes[sprite_number + 3].x = info.x;
         sprite_attributes[sprite_number + 3].y = info.y + 8;
@@ -332,7 +288,6 @@ int helicopter(int sprite_number, SPRITE_STATE info)
         sprite_attributes[sprite_number + 5].sprite_pattern = CHOPTER_FRONT;
 
     }
-
 
     return 6;
 }
@@ -550,8 +505,6 @@ void main()
 
     int emergency_stop = 0;
 
-
-
     // *************PREPARE THIS WAVE
 
     int hel_pos = 16*2;
@@ -596,7 +549,7 @@ void main()
     int start, stop, inc;
     for (;;)
     {
-        for (int repeat=0; repeat<2; repeat++)
+        //for (int repeat=0; repeat<2; repeat++)
         {
             
             //direction = -direction;
@@ -616,7 +569,7 @@ void main()
 
             for(int i=start; i != stop; i += inc)
             {
-                sprite_attributes[i].early_clock = 1;
+                //sprite_attributes[i].early_clock = 1;
                 if (hel_sprites[i].enable)
                 {
                     if (hel_sprites[i].state != -1)
@@ -683,24 +636,16 @@ void main()
                     }
                 }
 
-                if (emergency_stop)
-                {
-                    if (man_sprites[i].enable)
-                    {
-                        sprintf(title, "emergency stop[%d] man.state:%d (%d,%d)", i, man_sprites[i].state, man_sprites[i].x, man_sprites[i].y);
-                        debug(title, 7);
-                        getchar();
-                        sprintf(title, "                     ");
-                        debug(title,7);
-                    }
-                }
 
                 if (man_sprites[i].enable)
                 {
-                    sprintf(title, "JUMPED (%d,%d) sprite %d", man_sprites[i].x, man_sprites[i].y, sprite);
-                    debug(title, 7);
-                    getchar();
+                    //sprintf(title, "JUMPED (%d,%d) sprite %d", man_sprites[i].x, man_sprites[i].y, sprite);
+                    //debug(title, 7);
+                    //getchar();
                     n = parachuter(sprite, man_sprites[i]);
+                    
+                    sprintf(title, "JUMPED (%d,%d) sprite %d n %d", man_sprites[i].x, man_sprites[i].y, sprite, n);
+                    debug(title, 7);
                     getchar();
 
                     sprite += n;
@@ -710,8 +655,8 @@ void main()
                         break;
                     }
 
-                    sprintf(title, "man[%d].state: %d (%d,%d))  ", i, man_sprites[i].state, man_sprites[i].x, man_sprites[i].y);
-                    debug(title, 3);
+                    //sprintf(title, "man[%d].state: %d (%d,%d))  ", i, man_sprites[i].state, man_sprites[i].x, man_sprites[i].y);
+                    //debug(title, 3);
                 }
 
 
@@ -733,8 +678,8 @@ void main()
                 sprite_attributes[sprite+1].y = SPRITE_TERMINATOR;
 
 
-            sprintf(title, "total sprites#:%d   ", sprite);
-            debug(title, 20);
+            //sprintf(title, "total sprites#:%d   ", sprite);
+            //debug(title, 20);
             //getchar();
 
             vwrite(sprite_attributes, VRAM_SPRITE_ATTRIBUTES, 32 * sizeof(SPRITE_ATTRIBUTE));
@@ -837,7 +782,7 @@ void main()
         */
 
         // MOVE THE MEN
-        for(int i=0; i<32; i++)
+        for(int i=0; i<-32; i++)
         {
             if (! man_sprites[i].enable)
                 continue;
@@ -897,7 +842,6 @@ void main()
         }
         */
 
-        delay(50);
     }    
 
     end();
