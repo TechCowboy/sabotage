@@ -63,9 +63,11 @@ typedef struct
     int sprite;
     int state;
     int flip;
+    int inc_x_every;
+    int inc_y_every;
     int x;
     int y;
-    int drop_at;
+    int bomb_wait;
     int going_left;
     int jump_wait;
     int appearance_wait;
