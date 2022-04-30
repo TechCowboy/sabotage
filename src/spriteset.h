@@ -63,8 +63,8 @@ typedef struct
     int sprite;
     int state;
     int flip;
-    int inc_x_every;
-    int inc_y_every;
+    int inc_x;
+    int inc_y;
     int x;
     int y;
     int bomb_wait;
@@ -72,7 +72,7 @@ typedef struct
     int jump_wait;
     int appearance_wait;
     int jumpers;
-    int bomb;
+    int bombs;
 
 } SPRITE_STATE;
 
