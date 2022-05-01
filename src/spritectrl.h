@@ -21,7 +21,10 @@
 
 #define FLOATING_SPEED 1
 #define FALLING_SPEED 5
-#define HELICOPTER_SPEED 1
+#define CHOPTER_SLOW 1
+#define CHOPTER_MED  2
+#define CHOPTER_FAST 4
+
 #define JET_SPEED 4
 #define SHOT_X_SPEED 1
 #define SHOT_Y_SPEED 1

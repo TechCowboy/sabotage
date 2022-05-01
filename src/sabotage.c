@@ -236,6 +236,7 @@ typedef struct _wave
 {
     int helicopters;
     int heli_height;
+    int heli_speed;
     int jumpers;
     int jets;
     int bombs_per_jet;
@@ -254,13 +255,11 @@ void main()
     SPRITE_STATE  shot_sprites[32];
     SPRITE_STATE  bomb_sprites[32];
     WAVE waves[] = {
-        { 2, 24, 1, 0, 0 },
-        { 4, 24, 1, 0, 0 },
-        { 4, 36, 2, 0, 0 },
-        { 4, 36, 2, 1, 1 },
-        { 4, 50, 4, 4, 4 }
-    };
-
+        {2, 24, CHOPTER_FAST, 1, 0, 0},
+        {4, 24, CHOPTER_FAST, 1, 0, 0},
+        {4, 36, CHOPTER_FAST, 2, 0, 0},
+        {4, 36, CHOPTER_FAST, 2, 1, 1},
+        {4, 50, CHOPTER_FAST, 4, 4, 4}};
 
     srand(1);
 
@@ -285,7 +284,7 @@ void main()
         hel_sprites[i].going_left = left;
         hel_sprites[i].appearance_wait = my_rand(8, 256 - 8);
         hel_sprites[i].y = SPRITE_TERMINATOR;
-        hel_sprites[i].inc_x = HELICOPTER_SPEED;
+        hel_sprites[i].inc_x = CHOPTER_SLOW;
         hel_sprites[i].inc_y = 0;
 
         
@@ -375,7 +374,7 @@ void main()
             hel_sprites[i].enable = true;
             hel_sprites[i].state = OFF_SCREEN;
             hel_sprites[i].jumpers = waves[wave].jumpers;
-            hel_sprites[i].inc_x = HELICOPTER_SPEED;
+            hel_sprites[i].inc_x = waves[wave].heli_speed;
             hel_sprites[i].inc_y = 0;
 
             hel_sprites[i].going_left = left;
@@ -386,7 +385,7 @@ void main()
                 hel_sprites[i].x = right_start_x;
 
             hel_sprites[i].y = set_y(hel_pos);
-            hel_sprites[i].appearance_wait = my_rand(8, 32);
+            hel_sprites[i].appearance_wait = my_rand(8, 80);
             hel_sprites[i].jump_wait = my_rand(32, 256 - 32);
             hel_pos += 16;
 
@@ -401,6 +400,8 @@ void main()
             jet_sprites[i].enable = true;
             jet_sprites[i].state = OFF_SCREEN;
             jet_sprites[i].bombs = waves[wave].bombs_per_jet;
+            jet_sprites[i].inc_x = JET_SPEED;
+            jet_sprites[i].inc_y = 0;
 
             jet_sprites[i].going_left = left;
 
@@ -410,7 +411,7 @@ void main()
                 jet_sprites[i].x = right_start_x;
 
             jet_sprites[i].y = set_y(jet_pos);
-            jet_sprites[i].appearance_wait = my_rand(8, 32);
+            jet_sprites[i].appearance_wait = my_rand(8, 80);
             jet_sprites[i].bomb_wait = my_rand(32, 64) / JET_SPEED;
             jet_pos += 16;
             left = ! left;
@@ -580,8 +581,11 @@ void main()
                 }
             } // for repeat
 
+            // wave is done if there are no active sprites on screen
             if (wave_done)
                 break;
+
+
             // flip is used for failing parachutes and 
             // helicopter rotors. 
             for(int i=0; i<32; i++)
