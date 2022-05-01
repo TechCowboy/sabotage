@@ -1,5 +1,6 @@
 #include <msx.h>
 #include <msx/gfx.h>
+#include <eos.h>
 #include "src/graphics.h"
 #include "src/colorset.h"
 #include "src/spriteset.h"
