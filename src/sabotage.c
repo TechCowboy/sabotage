@@ -581,7 +581,9 @@ void main()
                 }
             } // for repeat
 
+            // *****************************************************
             // wave is done if there are no active sprites on screen
+            // *****************************************************
             if (wave_done)
                 break;
 
@@ -632,7 +634,9 @@ void main()
                     continue;
 
                 add_sprite = 0;
+                // **********************************
                 // SEE IF IT'S TIME TO DROP A MAN
+                // **********************************
                 if ((hel_sprites[i].state == ON_SCREEN) && (hel_sprites[i].jumpers > 0))
                 {
                     hel_sprites[i].jump_wait--;
@@ -680,7 +684,10 @@ void main()
                     continue;
 
                 add_sprite = 0;
+
+                // ********************************
                 // SEE IF IT'S TIME TO DROP A BOMB
+                // ********************************
                 if ((jet_sprites[i].state == ON_SCREEN) && (jet_sprites[i].bombs > 0))
                 {
                     jet_sprites[i].bomb_wait--;
@@ -803,6 +810,7 @@ void main()
                         {
                             hel_sprites[i].state == OFF_SCREEN;
                             hel_sprites[i].enable = false;
+                            hel_sprites[i].jumpers = 0;
                         }
                     }
                     else
@@ -811,6 +819,7 @@ void main()
                         {
                             hel_sprites[i].state == OFF_SCREEN;
                             hel_sprites[i].enable = false;
+                            hel_sprites[i].jumpers = 0;
                         }
                     }
                 }
@@ -823,6 +832,7 @@ void main()
                         {
                             jet_sprites[i].state == OFF_SCREEN;
                             jet_sprites[i].enable = false;
+                            jet_sprites[i].bombs = 0;
                         }
                     }
                     else
@@ -831,6 +841,7 @@ void main()
                         {
                             jet_sprites[i].state == OFF_SCREEN;
                             jet_sprites[i].enable = false;
+                            jet_sprites[i].jumpers = 0;
                         }
                     }
                 }
