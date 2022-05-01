@@ -11,13 +11,9 @@
 #include "colorset.h"
 #include "graphics.h"
 #include "sound.h"
+#include "charctrl.h"
 #include "spritectrl.h"
-
-#define MIN(x, y) x < y ? x : y
-#define MAX(x, y) x > y ? x : y
-
-#define my_rand(min, max) (rand() % (max - min + 1)) + min
-
+#include "misc.h"
 
 unsigned char title[940];
 
@@ -31,89 +27,6 @@ void debug(char *message, int line)
     //getchar();
 }
 
-
-int introduction(int group)
-{
-    unsigned char intro[] =
-        "     ************SABOTAGE***********    "
-        "      Based on a game by Mark Allen     "
-        "     Coleco Adaption by Norman Davie    "
-        "                                        "
-        "The object of  SABOTAGE  is  to score as"
-        "many points as possible before the enemy"
-        "destroys your gun  emplacement. Your gun"
-        "may be destroyed either by a hit from an"
-        "enemy bomb  or by  SABOTAGE  when enough"
-        "paratroopers  have reached  the  ground."
-        "The gun is controlled by the joystick or"
-        "the  keyboard.  If  you  are  using  the"
-        "keyboard,  pressing 'D'  will  move  the"
-        "gun counter-clockwise and  'F' will move"
-        "it clockwise.  Any other key will fire a"
-        "shell.  FIRING A SHELL  COSTS ONE POINT."
-        "          TARGET     POINTS             "
-        "          ======     ======             "
-        "          BOMB           25             "
-        "          HELICOPTER      5             "
-        "          JET             5             "
-        "          PARATROOPER     2             "
-        "                                        "
-        "   DO YOU WANT  STEERABLE SHELLS (Y/N)? ";
- 
-    for (int x = 0; x < strlen(intro); x++)
-    {
-        intro[x] = intro[x] + 256*group;
-    }
-    vwrite(intro, VRAM_NAME_TABLE, MIN(strlen(intro), total_columns*total_rows));
-
-
-    return getchar();
-}
-
-
-void create_text_ground(void)
-{
-
-    int y = total_rows-1;
-    int x;
-    
-    for (x=0; x<total_columns; x++)
-        vpoke(VRAM_NAME_TABLE+y*total_columns+x, CHAR_GROUND);
-
-}
-
-void create_text_turret(void)
-{
-
-    int y = total_rows - 1;
-    int x;
-
-    for (y = total_rows - 2; y < total_rows + 1; y++)
-    {
-        x = total_columns / 2 - 1;
-        if (y == total_columns - 1)
-            vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_LEFT);
-        else
-            vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_MID);
-
-        vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_MID);
-
-        if (y == total_columns - 1)
-            vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_RIGHT);
-        else
-            vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_MID);
-    }
-}
-
-
-
-void end()
-{
-    mode_text();
-    clr(' ');
-    strcpy(title, "The End.");
-    vwrite(title, VRAM_NAME_TABLE, strlen(title));
-}
 
 void delay(int x)
 {
@@ -144,30 +57,6 @@ rows, the second 256 patterns, and for the last 8 rows the third 256 patterns
 first). If a bit is set, the foreground colour in the CT is used, otherwise 
 the background colour in the CT.
 */
-
-void test_char_color(void)
-{
-    int x;
-    int y = 0;
-
-    int color1 = SHIFTED_COLOR_CYAN | COLOR_DARK_RED;
-    int color2 = SHIFTED_COLOR_DARK_RED  | COLOR_CYAN;
-    int color3 = SHIFTED_COLOR_DARK_YELLOW | COLOR_LIGHT_BLUE;
-    vpoke(VRAM_COLOR_TABLE,        color1);
-    vpoke(VRAM_COLOR_TABLE + 2048, color2);
-    vpoke(VRAM_COLOR_TABLE + 4096, color3);
-
-    for (int z=0; z < 4096; z += 2048)
-    {
-        for(y = 0; y < total_rows; y += 2)
-        {
-            for (x=0; x < total_columns; x += 2)
-            {
-                vpoke(VRAM_NAME_TABLE+y*total_columns + x, z);
-            }
-        }
-    }
-}
 
 
 
@@ -232,18 +121,6 @@ int collision_detect(int sprite_number)
 /******************************************/
 /******************************************/
 
-typedef struct _wave
-{
-    int helicopters;
-    int heli_height;
-    int heli_speed;
-    int jumpers;
-    int jets;
-    int bombs_per_jet;
-
-} WAVE;
-
-
 void main()
 {
     char temp[80];
@@ -255,10 +132,10 @@ void main()
     SPRITE_STATE  shot_sprites[32];
     SPRITE_STATE  bomb_sprites[32];
     WAVE waves[] = {
-        {2, 24, CHOPTER_FAST, 1, 0, 0},
-        {4, 24, CHOPTER_FAST, 1, 0, 0},
-        {4, 36, CHOPTER_FAST, 2, 0, 0},
-        {4, 36, CHOPTER_FAST, 2, 1, 1},
+        {2, 24, CHOPTER_SLOW, 1, 0, 0},
+        {4, 24, CHOPTER_SLOW, 1, 0, 0},
+        {4, 36, CHOPTER_MED,  2, 0, 0},
+        {4, 36, CHOPTER_MED,  2, 1, 1},
         {4, 50, CHOPTER_FAST, 4, 4, 4}};
 
     srand(1);

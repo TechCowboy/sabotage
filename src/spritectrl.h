@@ -31,6 +31,18 @@
 #define BOMB_X_SPEED 1
 #define BOMB_Y_SPEED 4
 
+typedef struct _wave
+{
+    int helicopters;
+    int heli_height;
+    int heli_speed;
+    int jumpers;
+    int jets;
+    int bombs_per_jet;
+
+} WAVE;
+
+
 int set_y(int y);
 int parachuter(int sprite_number, SPRITE_STATE info);
 int jet(int sprite_number, SPRITE_STATE info);
