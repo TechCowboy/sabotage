@@ -5,12 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define CHAR_TURRET_LEFT  128
-#define CHAR_TURRET_RIGHT 129
-#define CHAR_STAND_LEFT   130
-#define CHAR_STAND_MID    131
-#define CHAR_STAND_RIGHT  132
-#define CHAR_GROUND       135
 
 #define COLOR_TRANSPARENT  0x00
 #define COLOR_BLACK        0x01

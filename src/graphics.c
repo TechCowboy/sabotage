@@ -1,17 +1,18 @@
 #include <msx.h>
 #include <msx/gfx.h>
 #include <eos.h>
-#include "src/graphics.h"
-#include "src/colorset.h"
-#include "src/spriteset.h"
-#include "src/vdp_registers.h"
-#include "src/charset.h"
+#include "graphics.h"
+#include "colorset.h"
+#include "spriteset.h"
+#include "vdp_registers.h"
+#include "charset.h"
 
 int total_columns, total_rows;
-
+extern unsigned char character_colour[];
 
 void clr(unsigned char fillchar)
 {
+    fillchar = fillchar - 32;
     fill(VRAM_NAME_TABLE, fillchar, total_rows * total_columns);
 }
 
@@ -143,12 +144,22 @@ void mode_graphics_ii(void)
     vwrite(character_set, VRAM_GENERATOR_TABLE, 256 * 8 * 2);
     vwrite(character_set, VRAM_GENERATOR_TABLE, 256 * 8 * 3);
 
+/*
     // top 8 rows
-    memset(mode_ii_color_set,           SHIFTED_COLOR_DARK_GREEN   | COLOR_CYAN, 256 * 8);
+    memcpy(mode_ii_color_set,           character_colour, 256 * 8);
     // mid 8 rows
-    memset(mode_ii_color_set + 256 * 8, SHIFTED_COLOR_LIGHT_GREEN  | COLOR_LIGHT_YELLOW, 256 * 8);
+    memcpy(mode_ii_color_set + 256 * 8, character_colour, 256 * 8);
+    // bottom 8 rows
+    memcpy(mode_ii_color_set + 512 * 8, character_colour, 256 * 8);
+*/
+
+    // top 8 rows
+    memset(mode_ii_color_set, SHIFTED_COLOR_DARK_GREEN | COLOR_CYAN, 256 * 8);
+    // mid 8 rows
+    memset(mode_ii_color_set + 256 * 8, SHIFTED_COLOR_LIGHT_GREEN | COLOR_LIGHT_YELLOW, 256 * 8);
     // bottom 8 rows
     memset(mode_ii_color_set + 512 * 8, SHIFTED_COLOR_LIGHT_YELLOW | COLOR_LIGHT_RED, 256 * 8);
+
 
     vwrite(mode_ii_color_set, VRAM_COLOR_TABLE, 3 * 256 * 8);
 

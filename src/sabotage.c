@@ -18,24 +18,20 @@
 unsigned char title[940];
 
 
-void debug(char *message, int line)
+void vprint(char *message, int line)
 {
     if (strlen(message) == 0)
         strcat(message, " ");
-    vwrite("                                                 ", VRAM_NAME_TABLE + line * total_columns, total_columns);
-    vwrite(message, VRAM_NAME_TABLE+line*total_columns, strlen(message));
+    
+    int length = strlen(message);
+
+    for (int i = 0; i < length; i++)
+        message[i] -= 32;
+
+    vwrite(message, VRAM_NAME_TABLE + line * total_columns, length);
     //getchar();
 }
 
-
-void delay(int x)
-{
-    for(int z=0; z<x; z++)
-    {
-        for (int z2=0; z2<100; z2++)
-            ;
-    }
-}
 
 /*
 color mode ii
@@ -126,31 +122,34 @@ void main()
     char temp[80];
     int  answer;
     bool steerable = false;
-    SPRITE_STATE  hel_sprites[32];
+    int right_start_x = 0;
+    int left_start_x = 256 - 8 * 3;
+    int rotation = 0;
+    bool left = false;
+    SPRITE_STATE hel_sprites[32];
     SPRITE_STATE  jet_sprites[32];
     SPRITE_STATE  man_sprites[32];
     SPRITE_STATE  shot_sprites[32];
     SPRITE_STATE  bomb_sprites[32];
-    WAVE waves[] = {
+    WAVE waves[] = 
+    {
         {2, 24, CHOPTER_SLOW, 1, 0, 0},
         {4, 24, CHOPTER_SLOW, 1, 0, 0},
         {4, 36, CHOPTER_MED,  2, 0, 0},
         {4, 36, CHOPTER_MED,  2, 1, 1},
-        {4, 50, CHOPTER_FAST, 4, 4, 4}};
+        {4, 50, CHOPTER_FAST, 4, 4, 4}
+    };
 
     srand(1);
 
     mode_text();
     clr(' ');
-    debug("Please Wait...", 0);
+    vprint("Please Wait...", 0);
 
-    int right_start_x = 0;
-    int left_start_x = 256 - 8 * 3;
 
     /******** INIT ******************/
 
     sound_init();
-    bool left = false;
     for(int i=0; i<32; i++)
     {
         hel_sprites[i].flip = rand() < 16384 ? true : false;
@@ -204,25 +203,19 @@ void main()
     answer = introduction(0);
     steerable = ((answer == 'Y') || (answer == 'y'));
 
-    //create_ground_and_turret();
-    //getchar();
-    //memset(sprite_attributes, 0, sizeof(SPRITE_ATTRIBUTE) * 32);
-
     mode_graphics_ii();
-
-    //clr(' ');
-    //test_char_color();
-
-    //clr(' ');
-    //test_sprites();
-    //getchar();
-
     clr(' ');
 
     create_text_ground();
-    create_text_turret();
+    create_text_turret(0);
 
-
+/*
+    for(rotation=0; rotation<5; rotation++)
+    {
+        create_text_turret(rotation);
+        getchar();
+    }
+*/
     int helicopters = 2;
     int jets        = 2;
     int shots       = 4;
@@ -241,7 +234,7 @@ void main()
     for (int wave=0; wave<4; wave++)
     {
         sprintf(title, "WAVE %d", wave+1);
-        debug(title,0);
+        vprint(title,0);
 
         left = my_rand(0,1);
         hel_pos = waves[wave].heli_height;
@@ -333,7 +326,7 @@ void main()
                             {
                                 sprite -= n;
                                 sprintf(title, "TOO MANY SPRITES!");
-                                debug(title, 13);
+                                vprint(title, 13);
                                 break;
                             }
                             hel_sprites[i].sprite = sprite;
@@ -364,7 +357,7 @@ void main()
                             {
                                 sprite -=n;
                                 sprintf(title, "TOO MANY SPRITES!");
-                                debug(title, 13);
+                                vprint(title, 13);
                                 break;
                             }
                             jet_sprites[i].sprite = sprite;
@@ -394,7 +387,7 @@ void main()
                         {
                             sprite -= n;
                             sprintf(title, "TOO MANY SPRITES!");
-                            debug(title, 13);
+                            vprint(title, 13);
                             break;
                         }
                         man_sprites[i].sprite = sprite;
@@ -405,7 +398,7 @@ void main()
                     {
                         wave_done = false;
                         sprintf(title, "SHOT! (%d,%d) sprite %d", shot_sprites[i].x, shot_sprites[i].y, sprite);
-                        debug(title, 4);
+                        vprint(title, 4);
                         n = shot(sprite, shot_sprites[i]);
 
                         sprite += n;
@@ -413,7 +406,7 @@ void main()
                         {
                             sprite -= n;
                             sprintf(title, "TOO MANY SPRITES!");
-                            debug(title, 13);
+                            vprint(title, 13);
                             break;
                         }
                         shot_sprites[i].sprite = sprite;
@@ -430,7 +423,7 @@ void main()
                         {
                             sprite -= n;
                             sprintf(title, "TOO MANY SPRITES!");
-                            debug(title, 13);
+                            vprint(title, 13);
                             break;
                         }
                         bomb_sprites[i].sprite = sprite;
@@ -444,16 +437,16 @@ void main()
                 if (emergency_stop)
                 {
                     sprintf(title, "Total sprites: %d", sprite);
-                    debug(title, 12);
+                    vprint(title, 12);
                     strcpy(title, ".");
-                    debug(title, 13);
+                    vprint(title, 13);
                     for(int w =0; w<sprite+2; w++)
                     {
                         sprintf(temp, "%d(%d,%d) ", w, (int)sprite_attributes[w].x, (int)sprite_attributes[w].x);
                         strcat(title, temp);
-                        debug(title,13);
+                        vprint(title,13);
                     }
-                    debug(title, 13);
+                    vprint(title, 13);
                     getchar();
                 }
             } // for repeat
@@ -670,7 +663,7 @@ void main()
                     // replace the man sprite with a man character
                     char_x = man_sprites[i].x / 8;
                     char_y = man_sprites[i].y / 8;
-                    vpoke(VRAM_NAME_TABLE + char_y * total_columns + char_x + 1, CHAR_MAN);
+                    //vpoke(VRAM_NAME_TABLE + char_y * total_columns + char_x + 1, CHAR_MAN);
                 }
             }
 
