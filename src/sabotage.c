@@ -17,33 +17,6 @@
 
 unsigned char title[940];
 
-
-
-
-
-/*
-color mode ii
-
-The first character is the top-left one, the second the one to the right of
-it. Character no. 32 the first character of the second row. There are three
-colour and three pattern tables. The character number is as follows:
-
-The first  8 rows: byte from PN + 000h
-The middle 8 rows: byte from PN + 100h
-The bottom 8 rows: byte from PN + 200h
-
-Each character is 8 x 8. The character number refers to an character pattern 
-in the PG, which has 768 characters patterns (three distinct tables). For the 
-first 8 rows of the screen, the first 256 entries are used. For the second 8 
-rows, the second 256 patterns, and for the last 8 rows the third 256 patterns 
-(depending on the value of control register #4, see below). So the entire PG is
-3 x 256 x 8 = 6144 bytes. Each byte is a pixel line of the character (top 
-first). If a bit is set, the foreground colour in the CT is used, otherwise 
-the background colour in the CT.
-*/
-
-
-
 /*
 int collision_detect(int sprite_number)
 {
@@ -198,6 +171,10 @@ void main()
     create_text_ground();
     create_text_turret(0);
 
+    //test_char_color();
+    //getchar();
+
+    /*
     vprint("Stopping for rotation test",0);
     for(rotation=0; rotation<8;)
     {
@@ -217,8 +194,9 @@ void main()
                 break;
         }
         rotation = MAX(0, rotation);
-        rotation = MIN(7, rotation);
+        rotation = MIN(6, rotation);
     }
+*/
 
     int helicopters = 2;
     int jets        = 2;

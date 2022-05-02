@@ -24,15 +24,17 @@ char gun[7][2] =
 
 void vprint(char *message, int line)
 {
-    if (strlen(message) == 0)
-        strcat(message, " ");
+    char lmessage[960];
+    strcpy(lmessage, message);
+    if (strlen(lmessage) == 0)
+        strcat(lmessage, " ");
 
-    int length = strlen(message);
+    int length = strlen(lmessage);
 
     for (int i = 0; i < length; i++)
-        message[i] -= 32;
+        lmessage[i] -= 32;
 
-    vwrite(message, VRAM_NAME_TABLE + line * total_columns, length);
+    vwrite(lmessage, VRAM_NAME_TABLE + line * total_columns, length);
     // getchar();
 }
 
@@ -68,7 +70,6 @@ int introduction(int group)
     for (int x = 0; x < length; x++)
     {
         intro[x] -= 32;
-        intro[x] = intro[x] + 256 * group;
     }
     vwrite(intro, VRAM_NAME_TABLE, MIN(length, total_columns * total_rows));
 
@@ -124,24 +125,12 @@ void end()
 
 void test_char_color(void)
 {
-    int x;
-    int y = 0;
+    mode_graphics_ii();
 
-    int color1 = SHIFTED_COLOR_CYAN | COLOR_DARK_RED;
-    int color2 = SHIFTED_COLOR_DARK_RED | COLOR_CYAN;
-    int color3 = SHIFTED_COLOR_DARK_YELLOW | COLOR_LIGHT_BLUE;
-    vpoke(VRAM_COLOR_TABLE, color1);
-    vpoke(VRAM_COLOR_TABLE + 2048, color2);
-    vpoke(VRAM_COLOR_TABLE + 4096, color3);
+    clr('@');
+    getchar();
+    memcpy(mode_ii_color_set, character_color, 8*256);
 
-    for (int z = 0; z < 4096; z += 2048)
-    {
-        for (y = 0; y < total_rows; y += 2)
-        {
-            for (x = 0; x < total_columns; x += 2)
-            {
-                vpoke(VRAM_NAME_TABLE + y * total_columns + x, z);
-            }
-        }
-    }
+    getchar();
+
 }

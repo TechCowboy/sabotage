@@ -24,5 +24,6 @@
 #define CHAR_TURRET_RIGHT_GUN_6 112
 
 extern unsigned char character_set[];
+extern unsigned char character_color[];
 
 #endif

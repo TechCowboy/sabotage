@@ -88,6 +88,7 @@ void mode_text(void)
     total_rows = 24;
 }
 */
+
 /*
 color mode ii
 
