@@ -18,19 +18,7 @@
 unsigned char title[940];
 
 
-void vprint(char *message, int line)
-{
-    if (strlen(message) == 0)
-        strcat(message, " ");
-    
-    int length = strlen(message);
 
-    for (int i = 0; i < length; i++)
-        message[i] -= 32;
-
-    vwrite(message, VRAM_NAME_TABLE + line * total_columns, length);
-    //getchar();
-}
 
 
 /*
@@ -126,6 +114,7 @@ void main()
     int left_start_x = 256 - 8 * 3;
     int rotation = 0;
     bool left = false;
+    char c;
     SPRITE_STATE hel_sprites[32];
     SPRITE_STATE  jet_sprites[32];
     SPRITE_STATE  man_sprites[32];
@@ -209,13 +198,28 @@ void main()
     create_text_ground();
     create_text_turret(0);
 
-/*
-    for(rotation=0; rotation<5; rotation++)
+    vprint("Stopping for rotation test",0);
+    for(rotation=0; rotation<8;)
     {
         create_text_turret(rotation);
-        getchar();
+        c = getchar();
+        switch(c)
+        {
+            case 'j':
+            case 'J':
+                rotation--;
+                break;
+            case 'k':
+            case 'K':
+                rotation++;
+                break;
+            default:
+                break;
+        }
+        rotation = MAX(0, rotation);
+        rotation = MIN(7, rotation);
     }
-*/
+
     int helicopters = 2;
     int jets        = 2;
     int shots       = 4;

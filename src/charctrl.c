@@ -10,15 +10,31 @@
 
 extern char title[];
 
-char gun[5][4] =
+char gun[7][2] =
     {
-        {CHAR_LEFT_GUN_0, CHAR_TURRET_LEFT_GUN_0, CHAR_TURRET_RIGHT, CHAR_BLANK},
-        {CHAR_LEFT_GUN_1, CHAR_TURRET_LEFT_GUN_1, CHAR_TURRET_RIGHT, CHAR_BLANK},
-        {CHAR_LEFT_GUN_2, CHAR_TURRET_LEFT_GUN_2, CHAR_TURRET_RIGHT, CHAR_BLANK},
-        {CHAR_LEFT_GUN_3, CHAR_TURRET_LEFT_GUN_3, CHAR_TURRET_RIGHT, CHAR_BLANK},
-        {CHAR_LEFT_GUN_4, CHAR_TURRET_LEFT_GUN_4, CHAR_TURRET_RIGHT, CHAR_BLANK}
+        {CHAR_TURRET_LEFT_GUN_0, CHAR_TURRET_RIGHT},
+        {CHAR_TURRET_LEFT_GUN_1, CHAR_TURRET_RIGHT},
+        {CHAR_TURRET_LEFT_GUN_2, CHAR_TURRET_RIGHT},
+        {CHAR_TURRET_LEFT_GUN_3, CHAR_TURRET_RIGHT_GUN_3},
+        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_4},
+        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_5},
+        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_6}
 
 };
+
+void vprint(char *message, int line)
+{
+    if (strlen(message) == 0)
+        strcat(message, " ");
+
+    int length = strlen(message);
+
+    for (int i = 0; i < length; i++)
+        message[i] -= 32;
+
+    vwrite(message, VRAM_NAME_TABLE + line * total_columns, length);
+    // getchar();
+}
 
 int introduction(int group)
 {
@@ -75,16 +91,13 @@ void create_text_turret(int rotation)
     int y = total_rows - 1;
     int x;
 
-    for (y = total_rows - 2; y < total_rows + 1; y++)
+    for (y = total_rows - 1; y < total_rows + 1; y++)
     {
-        x = total_columns / 2 - 2;
+        x = total_columns / 2 - 1;
         if (y == total_columns - 1)
             vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_LEFT);
         else
             vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_MID);
-
-        vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_MID);
-        vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_MID);
         
         if (y == total_columns - 1)
             vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_RIGHT);
@@ -92,10 +105,10 @@ void create_text_turret(int rotation)
             vpoke(VRAM_NAME_TABLE + y * total_columns + x++, CHAR_STAND_MID);
     }
 
-    y = total_rows - 3;
-    x = total_columns / 2 - 2;
+    y = total_rows - 2;
+    x = total_columns / 2 - 1;
 
-    for(int i=0; i<4; i++)
+    for(int i=0; i<2; i++)
     {
         vpoke(VRAM_NAME_TABLE + y * total_columns + x++, gun[rotation][i]);
     }
