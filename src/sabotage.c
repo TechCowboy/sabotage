@@ -4,6 +4,7 @@
 #include <msx.h>
 #include <msx/gfx.h>
 #include <arch/z80.h>
+#include <eos.h>
 #include "charset.h"
 #include "colorset.h"
 #include "spriteset.h"
@@ -14,6 +15,8 @@
 #include "charctrl.h"
 #include "spritectrl.h"
 #include "misc.h"
+#include "readkeyboard.h"
+#include "readjoystick.h"
 
 unsigned char title[940];
 
@@ -112,6 +115,8 @@ void main()
     /******** INIT ******************/
 
     sound_init();
+    init_keyboard();
+    
     for(int i=0; i<32; i++)
     {
         hel_sprites[i].flip = rand() < 16384 ? true : false;
@@ -174,29 +179,8 @@ void main()
     //test_char_color();
     //getchar();
 
-    /*
-    vprint("Stopping for rotation test",0);
-    for(rotation=0; rotation<8;)
-    {
-        create_text_turret(rotation);
-        c = getchar();
-        switch(c)
-        {
-            case 'j':
-            case 'J':
-                rotation--;
-                break;
-            case 'k':
-            case 'K':
-                rotation++;
-                break;
-            default:
-                break;
-        }
-        rotation = MAX(0, rotation);
-        rotation = MIN(6, rotation);
-    }
-*/
+    
+
 
     int helicopters = 2;
     int jets        = 2;
@@ -212,7 +196,7 @@ void main()
 
     int direction = 1;
     int n;
-    int start, stop, inc, sprite, wave_done;
+    int start, stop, inc, sprite, wave_done, fire;
     for (int wave=0; wave<4; wave++)
     {
         sprintf(title, "WAVE %d", wave+1);
@@ -269,8 +253,19 @@ void main()
             left = ! left;
         }
 
+        
         while(true)
         {
+            rotation = read_keyboard(rotation);
+            fire = (rotation & 16384);
+            rotation=rotation & ~16384;
+
+            rotation = read_joystick(rotation);
+            fire = (rotation & 16384);
+            rotation = rotation & ~16384;
+
+            create_text_turret(rotation);
+
             // do this twice so that we have up to 8 sprites on screen
             for (int repeat=0; repeat<2; repeat++)
             {
