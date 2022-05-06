@@ -22,24 +22,12 @@ char gun[7][2] =
 
 };
 
-void vprint(char *message, int line)
-{
-    char lmessage[960];
-    strcpy(lmessage, message);
-    if (strlen(lmessage) == 0)
-        strcat(lmessage, " ");
 
-    int length = strlen(lmessage);
-
-    for (int i = 0; i < length; i++)
-        lmessage[i] -= 32;
-
-    vwrite(lmessage, VRAM_NAME_TABLE + line * total_columns, length);
-    // getchar();
-}
 
 int introduction(int group)
 {
+    int key;
+    int random=0;
     unsigned char intro[] =
         "     ************SABOTAGE***********    "
         "      Based on a game by Mark Allen     "
@@ -73,7 +61,18 @@ int introduction(int group)
     }
     vwrite(intro, VRAM_NAME_TABLE, MIN(length, total_columns * total_rows));
 
-    return getchar();
+    do
+    {
+        key = eos_end_read_keyboard();
+        eos_start_read_keyboard();
+        random++;
+    } while (key <= 1);
+
+    getchar();
+    
+    srand(random);
+
+    return key;
 }
 
 void create_text_ground(void)

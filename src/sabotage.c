@@ -90,6 +90,7 @@ void main()
     int left_start_x = 256 - 8 * 3;
     int rotation = 0;
     bool left = false;
+    int fire;
     char c;
     SPRITE_STATE hel_sprites[32];
     SPRITE_STATE  jet_sprites[32];
@@ -174,13 +175,23 @@ void main()
     clr(' ');
 
     create_text_ground();
-    create_text_turret(0);
+    rotation=0;
+    create_text_turret(rotation);
 
     //test_char_color();
     //getchar();
 
-    
-
+/*
+    for(;;)
+    {
+        rotation = read_joystick(rotation);
+        fire = (rotation & 16384) > 0;
+        rotation = rotation & (~16384);
+        create_text_turret(rotation);
+        sprintf(title, "rotation: %d  fire: %d", rotation, fire);
+        vprint(title, 1);
+    }
+*/
 
     int helicopters = 2;
     int jets        = 2;
@@ -196,7 +207,7 @@ void main()
 
     int direction = 1;
     int n;
-    int start, stop, inc, sprite, wave_done, fire;
+    int start, stop, inc, sprite, wave_done;
     for (int wave=0; wave<4; wave++)
     {
         sprintf(title, "WAVE %d", wave+1);
@@ -266,7 +277,9 @@ void main()
 
             create_text_turret(rotation);
 
+            // ********************************************************
             // do this twice so that we have up to 8 sprites on screen
+            // ********************************************************
             for (int repeat=0; repeat<2; repeat++)
             {
                 sprite = 0;
@@ -434,9 +447,10 @@ void main()
             if (wave_done)
                 break;
 
-
+            // *****************************************************
             // flip is used for failing parachutes and 
             // helicopter rotors. 
+            // *****************************************************
             for(int i=0; i<32; i++)
             {
                 hel_sprites[i].flip = ! hel_sprites[i].flip;
@@ -615,7 +629,9 @@ void main()
             }
             */
 
+            // *****************************************
             // MOVE THE MEN
+            // *****************************************
             for(int i=0; i<32; i++)
             {
                 if (man_sprites[i].state == OFF_SCREEN)
@@ -645,10 +661,14 @@ void main()
             }
 
 
+            // **************************************************
             // MOVE THE HELICOPTERS, JETS, BOMBS and SHOTS
+            // **************************************************
             for (int i = 0; i < 32; i++)
             {
+                // **********************************************
                 // hide sprites going off screen
+                // **********************************************
                 if (hel_sprites[i].state == ON_SCREEN)
                 {
                     if (hel_sprites[i].going_left)

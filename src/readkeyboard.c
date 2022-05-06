@@ -1,4 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "misc.h"
+#include "vdp_registers.h"
+#include <eos.h>
 
 extern char *title;
 
@@ -10,19 +14,13 @@ void init_keyboard(void)
 int read_keyboard(int rotation)
 {
     int fire=0;
-    //int s = eos_keyboard_status();
-    //if (s != 0)
-    //{
-    //    sprintf(title, "status: %d %c", c, c);
-    //    vprint(title, 1);
-    //    return rotation;
-    //}
-    int c = eos_end_read_keyboard();
-    if (c > 0)
+
+    rotation = rotation & (~16384);
+    int key = eos_end_read_keyboard();
+    eos_start_read_keyboard();
+    if (key > 1)
     {
-        //sprintf(title, "c: %d %c", c, c);
-        //vprint(title, 2);
-        switch (c)
+        switch (key)
         {
         case 'j':
         case 'J':
@@ -33,12 +31,14 @@ int read_keyboard(int rotation)
             rotation++;
             break;
         default:
+            sprintf(title, "key: %d ", key);
+            vprint(title, 6);
             fire = 16384;
             break;
         }
         rotation = MAX(0, rotation);
         rotation = MIN(6, rotation);
     }
-    eos_start_read_keyboard();
+
     return rotation | fire;
 }

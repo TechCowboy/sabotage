@@ -2,7 +2,8 @@
     "files.associations": {
         "stdio.h": "c",
         "spriteset.h": "c",
-        "interrupt.h": "c"
+        "interrupt.h": "c",
+        "charctrl.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

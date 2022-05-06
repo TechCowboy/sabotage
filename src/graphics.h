@@ -10,6 +10,7 @@
 
 
 void clr(unsigned char c);
+void vprint(char *message, int line);
 void mode_text(void);
 void mode_text2(void);
 void mode_graphics_ii(void);

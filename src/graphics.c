@@ -16,6 +16,21 @@ void clr(unsigned char fillchar)
     fill(VRAM_NAME_TABLE, fillchar, total_rows * total_columns);
 }
 
+void vprint(char *message, int line)
+{
+    char lmessage[960];
+    strcpy(lmessage, message);
+    if (strlen(lmessage) == 0)
+        strcat(lmessage, " ");
+
+    int length = strlen(lmessage);
+
+    for (int i = 0; i < length; i++)
+        lmessage[i] -= 32;
+
+    vwrite(lmessage, VRAM_NAME_TABLE + line * total_columns, length);
+    // getchar();
+}
 
 void mode_text(void)
 {
