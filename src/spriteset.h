@@ -43,6 +43,14 @@
 
 #define SPRITE_TERMINATOR   208
 
+#define SPRITE_TYPE_SHOT       1
+#define SPRITE_TYPE_CHUTE      2
+#define SPRITE_TYPE_MAN        3
+#define SPRITE_TYPE_HELICOPTER 4
+#define SPRITE_TYPE_JET        5
+#define SPRITE_TYPE_BOMB       6
+#define SPRITE_TYPE_EXPLODE    7
+ 
 extern unsigned char sprites[32 * 8];
 
 
@@ -67,15 +75,19 @@ typedef struct
     int inc_y;
     int x;
     int y;
+    int x2; // used for collision detection
+    int y2;
     int bomb_wait;
     int going_left;
     int jump_wait;
     int appearance_wait;
     int jumpers;
     int bombs;
+    int sprite_type;
 
 } SPRITE_STATE;
 
 extern SPRITE_ATTRIBUTE sprite_attributes[32];
+extern SPRITE_ATTRIBUTE reverse_attributes[32];
 
 #endif

@@ -31,8 +31,6 @@ int read_keyboard(int rotation)
             rotation++;
             break;
         default:
-            sprintf(title, "key: %d ", key);
-            vprint(title, 6);
             fire = 16384;
             break;
         }

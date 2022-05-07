@@ -12,13 +12,13 @@ extern char title[];
 
 char gun[7][2] =
     {
-        {CHAR_TURRET_LEFT_GUN_0, CHAR_TURRET_RIGHT},
-        {CHAR_TURRET_LEFT_GUN_1, CHAR_TURRET_RIGHT},
-        {CHAR_TURRET_LEFT_GUN_2, CHAR_TURRET_RIGHT},
-        {CHAR_TURRET_LEFT_GUN_3, CHAR_TURRET_RIGHT_GUN_3},
-        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_4},
-        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_5},
-        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_6}
+        {CHAR_TURRET_LEFT_GUN_0, CHAR_TURRET_RIGHT}, // 0
+        {CHAR_TURRET_LEFT_GUN_1, CHAR_TURRET_RIGHT}, // 1
+        {CHAR_TURRET_LEFT_GUN_2, CHAR_TURRET_RIGHT}, // 2
+        {CHAR_TURRET_LEFT_GUN_3, CHAR_TURRET_RIGHT_GUN_3},  // 3
+        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_4}, // 4
+        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_5}, // 5
+        {CHAR_TURRET_LEFT, CHAR_TURRET_RIGHT_GUN_6}  // 6
 
 };
 
@@ -61,12 +61,12 @@ int introduction(int group)
     }
     vwrite(intro, VRAM_NAME_TABLE, MIN(length, total_columns * total_rows));
 
-    do
-    {
-        key = eos_end_read_keyboard();
-        eos_start_read_keyboard();
-        random++;
-    } while (key <= 1);
+    //do
+    //{
+    //    key = eos_end_read_keyboard();
+    //    eos_start_read_keyboard();
+    //    random++;
+    //} while (key <= 1);
 
     getchar();
     
@@ -83,6 +83,7 @@ void create_text_ground(void)
 
     for (x = 0; x < total_columns; x++)
         vpoke(VRAM_NAME_TABLE + y * total_columns + x, CHAR_GROUND);
+
 }
 
 void create_text_turret(int rotation)
@@ -91,6 +92,10 @@ void create_text_turret(int rotation)
     int y = total_rows - 1;
     int x;
 
+    rotation = rotation & (~ 16384);
+    rotation = MIN(6, rotation);
+    rotation = MAX(0, rotation);
+    
     for (y = total_rows - 1; y < total_rows + 1; y++)
     {
         x = total_columns / 2 - 1;
@@ -112,9 +117,10 @@ void create_text_turret(int rotation)
     {
         vpoke(VRAM_NAME_TABLE + y * total_columns + x++, gun[rotation][i]);
     }
+
 }
 
-void end()
+void end_game()
 {
     mode_text();
     clr(' ');

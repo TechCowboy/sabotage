@@ -44,11 +44,12 @@ typedef struct _wave
 
 
 int set_y(int y);
-int parachuter(int sprite_number, SPRITE_STATE info);
-int jet(int sprite_number, SPRITE_STATE info);
-int bomb(int sprite_number, SPRITE_STATE info);
-int shot(int sprite_number, SPRITE_STATE info);
-int helicopter(int sprite_number, SPRITE_STATE info);
-
+int parachuter(int sprite_number, SPRITE_STATE *info);
+int jet(int sprite_number, SPRITE_STATE *info);
+int bomb(int sprite_number, SPRITE_STATE *info);
+int shot(int sprite_number, SPRITE_STATE *info);
+int helicopter(int sprite_number, SPRITE_STATE *info);
+int collision_detect(SPRITE_STATE *info1, SPRITE_STATE *info2[]);
+void reverse_sprites(void);
 #endif
 

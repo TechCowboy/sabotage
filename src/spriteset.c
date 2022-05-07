@@ -1,6 +1,7 @@
 #include "spriteset.h"
 
 SPRITE_ATTRIBUTE sprite_attributes[32];
+SPRITE_ATTRIBUTE reverse_attributes[32];
 
 unsigned char sprites[32 * 8] = // Length 256
     {
