@@ -110,7 +110,7 @@ void main()
     test_char_color();
 
     mode_graphics_ii();
-    //clr(' ');
+    clr(' ');
 
     create_text_ground();
     create_text_turret(rotation);
@@ -214,19 +214,8 @@ void main()
             rotation = rotation & ~16384;
             create_text_turret(rotation);
 
-            //sprintf(title, "fire: %02d", shot_delay);
-            //vprint(title, 1);
-            /*
-            if (shot_delay-- <= 0) 
-            {
-                fire = 1;
-                shot_delay = 15;
-            }
-            */
-
-            for (int i = 0; i < 32; i++)
-                sprite_attributes[i].y = SPRITE_TERMINATOR;
-
+            remove_sprites();
+            
             wave_done = true;
             for(int i=0; i <32; i++)
             {
@@ -387,8 +376,8 @@ void main()
             /* DISPLAY OUR SPRITES */
 
             vwrite(sprite_attributes, VRAM_SPRITE_ATTRIBUTES, 32 * sizeof(SPRITE_ATTRIBUTE));
-            //reverse_sprites();
-            //vwrite(reverse_attributes, VRAM_SPRITE_ATTRIBUTES, 32 * sizeof(SPRITE_ATTRIBUTE));
+            reverse_sprites();
+            vwrite(reverse_attributes, VRAM_SPRITE_ATTRIBUTES, 32 * sizeof(SPRITE_ATTRIBUTE));
 
 
             // *****************************************************

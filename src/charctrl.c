@@ -134,38 +134,24 @@ void end_game()
 void test_char_color(void)
 {
     char message[] = { "12345678901234567890123456789012"};
-    char lmessage[33];
-    short length = strlen(message);
-
-    for (unsigned short i=0; i<length; i++)
-    {
-        lmessage[i] = message[i]-32;
-    }
+    char temp[80];
 
     mode_graphics_ii();
 
-    mygetchar();
+    unsigned short addr = mode_ii_color_set;
+    int length = 8 * 256;
+    memset(addr, SHIFTED_COLOR_DARK_RED     | COLOR_DARK_GREEN, length);
+    addr += length;
+    memset(addr, SHIFTED_COLOR_DARK_GREEN   | COLOR_DARK_RED,   length);
+    addr += length;
+    memset(addr, SHIFTED_COLOR_LIGHT_YELLOW | COLOR_GRAY,       length);
+    
+    addr = VRAM_COLOR_TABLE;
+    eos_write_vram(length*3, addr, mode_ii_color_set);
 
-    //memset(mode_ii_color_set, SHIFTED_COLOR_DARK_RED | COLOR_DARK_GREEN, 8*256);
-    //length = 8*256;
-    //unsigned short addr = VRAM_COLOR_TABLE;
-    //eos_write_vram(length, addr, mode_ii_color_set);
-    //memset(mode_ii_color_set, SHIFTED_COLOR_DARK_GREEN | COLOR_DARK_RED, 8 * 256);
-    //addr += 8*256;
-    //eos_write_vram(length, addr, mode_ii_color_set);
-    //memset(mode_ii_color_set, SHIFTED_COLOR_LIGHT_YELLOW | SHIFTED_COLOR_GRAY, 8 * 256);
-    //addr += 8*256;
-    //eos_write_vram(length, addr, mode_ii_color_set);
-
-    //addr = VRAM_GENERATOR_TABLE;
-    //eos_write_vram(length, addr, character_set);
-    //addr += 8 * 256;
-    //eos_write_vram(length, addr, character_set);
-    //addr += 8 * 256;
-    //eos_write_vram(length, addr, character_set);
-    for(int line=0; line<24; line++)
+    for(int line=0; line<23; line++)
     {
-        eos_write_vram(32, (unsigned short) (VRAM_NAME_TABLE + line * total_columns), lmessage);
+        vprint(message, line);
     }
 
     mygetchar();

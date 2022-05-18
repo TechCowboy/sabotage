@@ -52,6 +52,7 @@ int bomb(int sprite_number, SPRITE_STATE *info);
 int shot(int sprite_number, SPRITE_STATE *info);
 int helicopter(int sprite_number, SPRITE_STATE *info);
 int collision_detect(int sprite_num, SPRITE_STATE *all, int debug);
+void remove_sprites(void);
 void reverse_sprites(void);
 void identify_sprite(int sprite_type, char *temp);
 #endif

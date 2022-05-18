@@ -80,7 +80,81 @@ void mode_text(void)
     total_rows = 24;
 }
 
-/*
+void mode_graphics_i(void)
+{
+    TMS_REGISTER_0 r0;
+    TMS_REGISTER_1 r1;
+    TMS_REGISTER_2 r2;
+    TMS_REGISTER_3 r3;
+    TMS_REGISTER_4 r4;
+    TMS_REGISTER_5 r5;
+    TMS_REGISTER_6 r6;
+    TMS_REGISTER_7 r7;
+
+    /* MEMORY MAP
+
+       VRAM_GENERATOR_TABLE
+       0000 - 07FF - char set
+
+       VRAM_COLOR_TABLE
+       2000 - 07FF - color set
+
+       VRAM_SPRITE_GENERATOR_TABLE
+       3800 - 38FF - sprite table
+
+       VRAM_SPRITE_ATTRIBUTES
+       3D00 - 3D7F - sprite attributes
+    */
+
+    // Graphics mode 1  M1=0, M2=0, M3=0
+    r0.M3 = 0;
+    r0.enable_VDP_input = 0;
+
+    r1.M1 = 0;
+    r1.M2 = 0;
+    r1.RAM_16K = 1;     // This is a 16K graphics chip
+    r1.Show_screen = 0; // don't display anything until everything is set
+    r1.Interrupt_enable = 0;
+    r1.Sprite_16x16_enable = 0;
+    r1.Magnify_sprite = 0;
+
+    eos_write_vdp_register(1, r1.reg1); // blank the display
+
+    r2.Base_address_of_name_table = VRAM_NAME_TABLE / 0x400;
+    r3.Base_address_of_color_table = VRAM_COLOR_TABLE / 0x040;
+    r4.Base_address_of_generator_table = VRAM_GENERATOR_TABLE / 0x800;
+    r5.Base_address_of_sprite_attribute_table = VRAM_SPRITE_ATTRIBUTES / 0x080;
+    r6.Base_address_of_sprite_generator_table = VRAM_SPRITE_GENERATOR_TABLE / 0x800;
+
+    // r7.foreground_color = COLOR_LIGHT_RED;
+    // r7.background_color = COLOR_BLACK;
+
+    int addr = VRAM_GENERATOR_TABLE;
+    int length = 256 * 8;
+    eos_write_vram(length, addr, character_set);
+
+    // top 8 rows
+    memset(mode_ii_color_set, SHIFTED_COLOR_DARK_GREEN | COLOR_CYAN, length);
+
+    eos_write_vram(length, VRAM_COLOR_TABLE, mode_ii_color_set);
+
+    eos_write_vram(32 * sizeof(SPRITE_ATTRIBUTE), VRAM_SPRITE_ATTRIBUTES, sprite_attributes);
+
+    eos_write_vram(32 * 8, VRAM_SPRITE_GENERATOR_TABLE, sprites);
+
+    eos_write_vdp_register(2, r2.reg2);
+    eos_write_vdp_register(3, r3.reg3);
+    eos_write_vdp_register(4, r4.reg4);
+    eos_write_vdp_register(5, r5.reg5);
+    eos_write_vdp_register(6, r6.reg6);
+    // eos_write_vdp_register(7, r7.reg7);
+
+    r1.Show_screen = 1; // show display
+    eos_write_vdp_register(1, r1.reg1);
+
+    total_columns = 32;
+    total_rows = 24;
+}
 
 /*
 color mode ii

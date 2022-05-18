@@ -267,13 +267,21 @@ int collision_detect(int sprite_num, SPRITE_STATE *all, int debug)
     return collision;
 }
 
+void remove_sprites(void)
+{
+    // Remove all sprites
+    for (int i = 0; i < 32; i++)
+    {
+        sprite_attributes[i].x = (unsigned char)0;
+        sprite_attributes[i].y = (unsigned char)SPRITE_TERMINATOR;
+    }
+}
+
 void reverse_sprites(void)
 {
-    static SPRITE_ATTRIBUTE reversed[32];
-    memcpy(reversed, sprite_attributes, 32*sizeof(SPRITE_ATTRIBUTE));
-
     int i=0;
-    for (int s = 32-1; s>0; s--)
+
+    for (int s = 32-1; s>=0; s--)
     {
         if (sprite_attributes[s].y == SPRITE_TERMINATOR)
             continue;
@@ -281,6 +289,9 @@ void reverse_sprites(void)
         reverse_attributes[i] = sprite_attributes[s];
         i++;
     }
+    
+    for ( ; i<32; i++)
+        reverse_attributes[i].y = SPRITE_TERMINATOR;
 
 }
 
