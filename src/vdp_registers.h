@@ -22,7 +22,7 @@ typedef union _TMS_REGISTER_1
         unsigned char M2 : 1;                  // 3
         unsigned char M1 : 1;                  // 4
         unsigned char Interrupt_enable : 1;    // 5
-        unsigned char Blank_disable : 1;       // 6
+        unsigned char Show_screen : 1;         // 6
         unsigned char RAM_16K : 1;             // 7
     };
     unsigned char reg1;

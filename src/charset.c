@@ -1,5 +1,5 @@
 #include "charset.h"
-unsigned char character_set[] =
+unsigned char character_set[8*256] =
     {
 
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //  space

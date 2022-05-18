@@ -22,9 +22,12 @@ char gun[7][2] =
 
 };
 
+int mygetchar(void)
+{
+    return getchar()  ;
+}
 
-
-int introduction(int group)
+int introduction(void)
 {
     int key;
     int random=0;
@@ -68,7 +71,7 @@ int introduction(int group)
     //    random++;
     //} while (key <= 1);
 
-    getchar();
+    mygetchar();
     
     srand(random);
 
@@ -130,12 +133,41 @@ void end_game()
 
 void test_char_color(void)
 {
+    char message[] = { "12345678901234567890123456789012"};
+    char lmessage[33];
+    short length = strlen(message);
+
+    for (unsigned short i=0; i<length; i++)
+    {
+        lmessage[i] = message[i]-32;
+    }
+
     mode_graphics_ii();
 
-    clr('@');
-    getchar();
-    memcpy(mode_ii_color_set, character_color, 8*256);
+    mygetchar();
 
-    getchar();
+    //memset(mode_ii_color_set, SHIFTED_COLOR_DARK_RED | COLOR_DARK_GREEN, 8*256);
+    //length = 8*256;
+    //unsigned short addr = VRAM_COLOR_TABLE;
+    //eos_write_vram(length, addr, mode_ii_color_set);
+    //memset(mode_ii_color_set, SHIFTED_COLOR_DARK_GREEN | COLOR_DARK_RED, 8 * 256);
+    //addr += 8*256;
+    //eos_write_vram(length, addr, mode_ii_color_set);
+    //memset(mode_ii_color_set, SHIFTED_COLOR_LIGHT_YELLOW | SHIFTED_COLOR_GRAY, 8 * 256);
+    //addr += 8*256;
+    //eos_write_vram(length, addr, mode_ii_color_set);
+
+    //addr = VRAM_GENERATOR_TABLE;
+    //eos_write_vram(length, addr, character_set);
+    //addr += 8 * 256;
+    //eos_write_vram(length, addr, character_set);
+    //addr += 8 * 256;
+    //eos_write_vram(length, addr, character_set);
+    for(int line=0; line<24; line++)
+    {
+        eos_write_vram(32, (unsigned short) (VRAM_NAME_TABLE + line * total_columns), lmessage);
+    }
+
+    mygetchar();
 
 }

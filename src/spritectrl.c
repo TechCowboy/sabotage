@@ -7,6 +7,7 @@
 #include "spriteset.h"
 #include "spritectrl.h"
 #include "colorset.h"
+#include "charctrl.h"
 
 static char temp[32];
 
@@ -20,6 +21,7 @@ int set_y(int y)
 
 int parachuter(int sprite_number, SPRITE_STATE *info)
 {
+    info->sprite_num = sprite_number;
 
     if (info->state <= JUMPED3)
     {
@@ -65,8 +67,8 @@ int parachuter(int sprite_number, SPRITE_STATE *info)
 
     sprite_attributes[sprite_number + 2].sprite_pattern = (info->state == FLOATING) ? CHUTE_MAN : GROUND_MAN;
 
-    info->x2 = sprite_attributes[sprite_number + 2].x + 8;
-    info->y2 = sprite_attributes[sprite_number + 2].y + 8;
+    info->x2 = info->x + 4 + 8;
+    info->y2 = info->y + 8 + 8;
     
     return 3; // 3 sprites used
 }
@@ -74,6 +76,8 @@ int parachuter(int sprite_number, SPRITE_STATE *info)
 int jet(int sprite_number, SPRITE_STATE *info)
 {
     static bool fail_sprite_flag = true;
+
+    info->sprite_num = sprite_number;
 
     sprite_attributes[sprite_number].sprite_pattern = info->going_left ? LJET_FRONT : JET_END;
 
@@ -94,34 +98,41 @@ int jet(int sprite_number, SPRITE_STATE *info)
     sprite_attributes[sprite_number + 2].x = info->x + 16;
     sprite_attributes[sprite_number + 2].y = set_y(info->y);
 
-    info->x2 = sprite_attributes[sprite_number + 2].x + 8;
-    info->y2 = sprite_attributes[sprite_number + 2].y + 8;
+    info->x2 = info->x + 16 +8;
+    info->y2 = info->y + 8;
 
-               return 3; // 3 sprites used
+    return 3; // 3 sprites used
 }
 
 int bomb(int sprite_number, SPRITE_STATE *info)
 {
+    info->sprite_num = sprite_number;
+
     sprite_attributes[sprite_number].sprite_pattern = BOMB;
     sprite_attributes[sprite_number].color_code = COLOR_LIGHT_RED;
     sprite_attributes[sprite_number].x = info->x;
     sprite_attributes[sprite_number].y = set_y(info->y);
 
-    info->x2 = sprite_attributes[sprite_number].x + 8;
-    info->y2 = sprite_attributes[sprite_number].y + 8;
+    info->x2 = info->x + 8;
+    info->y2 = info->y + 8;
 
     return 1;
 }
 
 int shot(int sprite_number, SPRITE_STATE *info)
 {
+    info->sprite_num = sprite_number;
+
     sprite_attributes[sprite_number].sprite_pattern = SHOT;
     sprite_attributes[sprite_number].color_code = COLOR_MAGENTA;
     sprite_attributes[sprite_number].x = info->x;
     sprite_attributes[sprite_number].y = set_y(info->y);
 
-    info->x2 = sprite_attributes[sprite_number].x + 8;
-    info->y2 = sprite_attributes[sprite_number].y + 8;
+    info->x2 = info->x + 8;
+    info->y2 = info->y + 8;
+
+    //sprintf(temp, "S(%d,%d)", info->x2, info->y2);
+    //vprint(temp, 19);
 
     return 1;
 }
@@ -131,6 +142,8 @@ int helicopter(int sprite_number, SPRITE_STATE *info)
     int blade_right = info->flip;
 
     // top
+    info->sprite_num = sprite_number;
+
     sprite_attributes[sprite_number].x = info->x;
     sprite_attributes[sprite_number].y = set_y(info->y);
     sprite_attributes[sprite_number].color_code = (blade_right) ? COLOR_WHITE : COLOR_TRANSPARENT;
@@ -192,50 +205,65 @@ int helicopter(int sprite_number, SPRITE_STATE *info)
     return 6;
 }
 
-int find_sprite(SPRITE_STATE state, int sprite_num)
-{
-    for(int i=0; i<32; i++)
-    {
-        if (state.sprite == sprite_num)
-            return true;
-    }
 
-    return false;
-}
-
-int collision_detect(SPRITE_STATE *info1, SPRITE_STATE *info2[])
+int collision_detect(int sprite_num, SPRITE_STATE *all, int debug)
 {
     int collision = -1;
-    int x1, x2, y1, y2, in_x_bound, in_y_bound;
+    int a1, a2, b1, b2, in_x_bound, in_y_bound;
+    SPRITE_STATE my_sprite;
+    char temp[180];
 
-    if (info1->sprite != -1)
+
+    if (debug)
+        for (int i=0; i<10; i++)
+            vprint("               ", i);
+
+    my_sprite = all[sprite_num];
+
+    for(int i=0; i<32; i++)
     {
-        for(int i=0; i<32; i++)
+
+        if (sprite_num == i)
+            continue;
+
+        if (! all[i].enable)
         {
-            if (info1->sprite == info2[i]->sprite)
-                continue;
+            continue;
+        }
+        
 
-            if (info2[i]->state == OFF_SCREEN)
+        a1 = my_sprite.x;
+        a2 = my_sprite.x2;
+
+        b1 = my_sprite.y;
+        b2 = my_sprite.y2;
+
+        if (debug)
+        {
+            sprintf(temp, "shot %02d\\[%d,%d][%d,%d]   ", all[i].sprite_num, b1, a2, b2);
+            vprint(temp, 3);
+            sprintf(temp, "type %02d/[%d,%d][%d,%d]   ",  all[i].sprite_type, all[i].x, all[i].y, all[i].x2, all[i].y2);
+            vprint(temp, 5);
+            // mygetchar();
+        }
+        in_x_bound = (all[i].x2 >= a1) && (all[i].x2 <= a2);
+        in_y_bound = (all[i].y2 >= b1) && (all[i].y2 <= b2);
+
+        if (in_x_bound && in_y_bound)
+        {
+            if (debug)
             {
-                continue;
+                sprintf(temp, "*********[%d] type: %02d  ", i, all[i].sprite_type);
+                vprint(temp, 6);
             }
-
-            x1 = info2[i]->x;
-            x2 = x1 + 8;
-
-            y1 = info2[i]->y;
-            y2 = y1 + 8;
-            
-            in_x_bound = (info2[i]->x >= x1) && (info2[i]->x <= x2);
-            in_y_bound = (info2[i]->y >= y1) && (info2[i]->y <= y2);
-
-            if (in_x_bound && in_y_bound)
-            {
-                collision = i;
-                break;
-            }
+            collision = all[i].sprite_num;
+            break;
         }
     }
+
+    if(debug)
+        mygetchar();
+
     return collision;
 }
 
@@ -252,6 +280,39 @@ void reverse_sprites(void)
 
         reverse_attributes[i] = sprite_attributes[s];
         i++;
+    }
+
+}
+
+void identify_sprite(int sprite_type, char *temp)
+{
+    switch (sprite_type)
+    {
+    case SPRITE_TYPE_BOMB:
+        strcpy(temp, "Bomb        ");
+        break;
+    case SPRITE_TYPE_CHUTE:
+        strcpy(temp, "Chute       ");
+        break;
+    case SPRITE_TYPE_EXPLODE:
+        strcpy(temp, "Explode     ");
+        break;
+    case SPRITE_TYPE_HELICOPTER:
+        strcpy(temp, "Helicopter  ");
+        break;
+    case SPRITE_TYPE_JET:
+        strcpy(temp, "Jet         ");
+        break;
+    case SPRITE_TYPE_MAN:
+        strcpy(temp, "man         ");
+        break;
+    case SPRITE_TYPE_SHOT:
+        strcpy(temp, "Shot        ");
+        break;
+    case SPRITE_TYPE_NONE:
+    default:
+        sprintf(temp, "Unknown %d  ", sprite_type);
+        break;
     }
 
 }

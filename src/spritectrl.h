@@ -9,6 +9,8 @@
 
 #define NO_SPRITE -1
 
+#define NO_COLLISION -1
+
 #define JUMPED 0
 #define JUMPED1 1
 #define JUMPED2 2
@@ -49,7 +51,8 @@ int jet(int sprite_number, SPRITE_STATE *info);
 int bomb(int sprite_number, SPRITE_STATE *info);
 int shot(int sprite_number, SPRITE_STATE *info);
 int helicopter(int sprite_number, SPRITE_STATE *info);
-int collision_detect(SPRITE_STATE *info1, SPRITE_STATE *info2[]);
+int collision_detect(int sprite_num, SPRITE_STATE *all, int debug);
 void reverse_sprites(void);
+void identify_sprite(int sprite_type, char *temp);
 #endif
 

@@ -20,61 +20,6 @@
 
 unsigned char title[940];
 
-/*
-int collision_detect(int sprite_number)
-{
-    int min_x=257, 
-        max_x=-1, 
-        min_y=193, 
-        max_y=-1;
-    int sprite_collision = -1;
-
-    if (sprite_number >= 0)
-    {
-        for(int s=0; s<32; s++)
-        {
-            if (sprite_list[s] == -1)
-                break;
-
-            if (sprite_list[s] == sprite_number)
-            {
-                min_x = MIN(min_x, (int) sprite_attributes[s].x);
-                max_x = MAX(max_x, (int) sprite_attributes[s].x+8);
-                min_y = MIN(min_y, (int) sprite_attributes[s].y);
-                max_y = MAX(max_y, (int) sprite_attributes[s].y+8);
-            }
-        }
-
-        for(int s=0; s<32; s++)
-        {
-            if (sprite_list[s] == -1)
-                break;
-
-            if (sprite_attributes[s].y == SPRITE_TERMINATOR)
-                break;
-            
-            if (sprite_list[s] == sprite_number)
-                continue;
-
-            if (sprite_attributes[s].color_code == COLOR_TRANSPARENT)
-                continue;
-            
-            if (((int) sprite_attributes[s].x >= min_x) && ((int) sprite_attributes[s].x <= max_x) &&
-                ((int) sprite_attributes[s].y >= min_y) && ((int) sprite_attributes[s].y <= max_y))
-            {
-                sprite_collision = sprite_list[s];
-                break;
-
-            }
-
-        }
-    }
-
-    return sprite_collision;
-}
-*/
-
-
 /******************************************/
 /******************************************/
 /***************  MAIN  *******************/
@@ -91,6 +36,9 @@ typedef struct _SHOT_ANGLE
 
 void main()
 {
+    int run_count = 0;
+    int stop_at = 168;
+    int display_debug = false;
     char temp[80];
     int  answer;
     bool steerable = false;
@@ -98,15 +46,20 @@ void main()
     int left_start_x = 256 - 8 * 3;
     int direction = 1;
     int n;
-    int start, stop, inc, sprite, wave_done, sprite_collision;
+    int start, stop, inc, wave_done, sprite_collision, total_sprites;
     bool left = false;
     int fire;
     char c;
     SPRITE_STATE all_sprites[32];
-    int shot_delay = 15;
+    int shot_delay = 30;
     WAVE waves[] = 
     {
-        {2, 24, CHOPTER_SLOW, 1, 0, 0},
+        { 2,  // Helicopters
+         24,  // Heli-height
+         CHOPTER_SLOW, // speed
+          1,  // jumpers per helicopter
+          0,  // jets
+          0}, // bombs per jet
         {4, 24, CHOPTER_SLOW, 1, 0, 0},
         {4, 36, CHOPTER_MED,  2, 0, 0},
         {4, 36, CHOPTER_MED,  2, 1, 1},
@@ -130,10 +83,9 @@ void main()
     clr(' ');
     vprint("Please Wait...", 0);
 
-
     /******** INIT ******************/
 
-    sound_init();
+    //sound_init();
     init_keyboard();
     
     for(int i=0; i<32; i++)
@@ -141,10 +93,10 @@ void main()
         all_sprites[i].flip = rand() < 16384 ? true : false;
         all_sprites[i].enable = false;
         all_sprites[i].state = OFF_SCREEN;
-        all_sprites[i].sprite = NO_SPRITE;
         all_sprites[i].jumpers = 1;
         all_sprites[i].going_left = left;
         all_sprites[i].appearance_wait = my_rand(8, 256 - 8);
+        all_sprites[i].disappearance_wait = 0;
         all_sprites[i].y = SPRITE_TERMINATOR;
         all_sprites[i].inc_x = CHOPTER_SLOW;
         all_sprites[i].inc_y = 0;
@@ -152,12 +104,13 @@ void main()
         left = ! left;
     }
 
-
-    answer = introduction(0);
+    answer = introduction();
     steerable = ((answer == 'Y') || (answer == 'y'));
 
+    test_char_color();
+
     mode_graphics_ii();
-    clr(' ');
+    //clr(' ');
 
     create_text_ground();
     create_text_turret(rotation);
@@ -183,31 +136,33 @@ void main()
         {
             all_sprites[i].enable = false;
             all_sprites[i].state = OFF_SCREEN;
+            all_sprites[i].sprite_type = SPRITE_TYPE_NONE;
+            all_sprites[i].disappearance_wait = 0;
         }
 
-        flyers = 0;
+        total_sprites = 0;
         for (int i = 0; i < waves[wave].helicopters; i++)
         {
-            all_sprites[flyers].sprite_type = SPRITE_TYPE_HELICOPTER;
-            all_sprites[flyers].enable = true;
-            all_sprites[flyers].state = OFF_SCREEN;
-            all_sprites[flyers].jumpers = waves[wave].jumpers;
-            all_sprites[flyers].inc_x = waves[wave].heli_speed;
-            all_sprites[flyers].inc_y = 0;
+            all_sprites[total_sprites].sprite_type = SPRITE_TYPE_HELICOPTER;
+            all_sprites[total_sprites].enable = true;
+            all_sprites[total_sprites].state = OFF_SCREEN;
+            all_sprites[total_sprites].jumpers = waves[wave].jumpers;
+            all_sprites[total_sprites].inc_x = waves[wave].heli_speed;
+            all_sprites[total_sprites].inc_y = 0;
 
-            all_sprites[flyers].going_left = left;
+            all_sprites[total_sprites].going_left = left;
 
-            if (all_sprites[flyers].going_left)
-                all_sprites[flyers].x = left_start_x;
+            if (all_sprites[total_sprites].going_left)
+                all_sprites[total_sprites].x = left_start_x;
             else
-                all_sprites[flyers].x = right_start_x;
+                all_sprites[total_sprites].x = right_start_x;
 
-            all_sprites[flyers].y = set_y(hel_pos);
-            all_sprites[flyers].appearance_wait = my_rand(8, 80);
-            all_sprites[flyers].jump_wait = my_rand(32, 256 - 32);
+            all_sprites[total_sprites].y = set_y(hel_pos);
+            all_sprites[total_sprites].appearance_wait = (total_sprites > 0) ? my_rand(8, 80) : 5;
+            all_sprites[total_sprites].jump_wait = my_rand(32, 256 - 32);
             hel_pos += 16;
 
-            flyers++;
+            total_sprites++;
             left = !left;
         }
 
@@ -216,25 +171,25 @@ void main()
         left = my_rand(0,1);
         for (int i = 0; i < waves[wave].jets; i++)
         {
-            all_sprites[flyers].sprite_type = SPRITE_TYPE_JET;
-            all_sprites[flyers].enable = true;
-            all_sprites[flyers].state = OFF_SCREEN;
-            all_sprites[flyers].bombs = waves[wave].bombs_per_jet;
-            all_sprites[flyers].inc_x = JET_SPEED;
-            all_sprites[flyers].inc_y = 0;
+            all_sprites[total_sprites].sprite_type = SPRITE_TYPE_JET;
+            all_sprites[total_sprites].enable = true;
+            all_sprites[total_sprites].state = OFF_SCREEN;
+            all_sprites[total_sprites].bombs = waves[wave].bombs_per_jet;
+            all_sprites[total_sprites].inc_x = JET_SPEED;
+            all_sprites[total_sprites].inc_y = 0;
 
-            all_sprites[flyers].going_left = left;
+            all_sprites[total_sprites].going_left = left;
 
-            if (all_sprites[flyers].going_left)
-                all_sprites[flyers].x = left_start_x;
+            if (all_sprites[total_sprites].going_left)
+                all_sprites[total_sprites].x = left_start_x;
             else
-                all_sprites[flyers].x = right_start_x;
+                all_sprites[total_sprites].x = right_start_x;
 
-            all_sprites[flyers].y = set_y(jet_pos);
-            all_sprites[flyers].appearance_wait = my_rand(8, 80);
-            all_sprites[flyers].bomb_wait = my_rand(32, 64) / JET_SPEED;
+            all_sprites[total_sprites].y = set_y(jet_pos);
+            all_sprites[total_sprites].appearance_wait = my_rand(8, 80);
+            all_sprites[total_sprites].bomb_wait = my_rand(32, 64) / JET_SPEED;
             jet_pos += 16;
-            flyers++;
+            total_sprites++;
 
             left = !left;
         }
@@ -242,6 +197,14 @@ void main()
         
         while(true)
         {
+            total_sprites = 0;
+            run_count++;
+            if (display_debug)
+            {
+                sprintf(title, "Run Count %d", run_count);
+                vprint(title, 2);
+            }
+
             rotation = read_keyboard(rotation);
             fire = (rotation & 16384);
 
@@ -251,40 +214,39 @@ void main()
             rotation = rotation & ~16384;
             create_text_turret(rotation);
 
-            if (--shot_delay > 0)
-                fire = 0;
-            else   
+            //sprintf(title, "fire: %02d", shot_delay);
+            //vprint(title, 1);
+            /*
+            if (shot_delay-- <= 0) 
             {
                 fire = 1;
                 shot_delay = 15;
             }
+            */
 
-            sprite = 0;
             for (int i = 0; i < 32; i++)
                 sprite_attributes[i].y = SPRITE_TERMINATOR;
 
             wave_done = true;
             for(int i=0; i <32; i++)
             {
-                // go through the sprites
+                // ***************************
+                // add helicopters
+                // ***************************
                 if (all_sprites[i].sprite_type == SPRITE_TYPE_HELICOPTER)
                 {
                     if (all_sprites[i].enable)
                     {
                         wave_done = false;
-                        /* ADD HELICOPTER SPRITES */
+                       
                         if (all_sprites[i].state == ON_SCREEN)
                         {
-                            n = helicopter(sprite, &all_sprites[i]);
-                            all_sprites[i].sprite = sprite;
+                            n = helicopter(total_sprites, &all_sprites[i]);
 
-                            sprite += n;
-                            if (sprite >= 31)
+                            total_sprites += n;
+                            if (total_sprites >= 31)
                             {
-                                all_sprites[i].sprite = -1;
-                                all_sprites[i].state = OFF_SCREEN;
-                                all_sprites[i].enable = false;
-                                sprite -= n;
+                                total_sprites -= n;
                                 sprintf(title, "TOO MANY SPRITES!");
                                 vprint(title, 13);
                                 break;
@@ -305,7 +267,9 @@ void main()
                     } // if hel enable
                 } // if hel
 
-                /* ADD JET SPRITES */
+                // ***************************
+                // add jets
+                // ***************************
                 if (all_sprites[i].sprite_type == SPRITE_TYPE_JET)
                 {
                     if (all_sprites[i].enable)
@@ -313,16 +277,12 @@ void main()
                         wave_done = false;
                         if (all_sprites[i].state == ON_SCREEN)
                         {
-                            n = jet(sprite, &all_sprites[i]);
-                            all_sprites[i].sprite = sprite;
+                            n = jet(total_sprites, &all_sprites[i]);
 
-                            sprite += n;
-                            if (sprite >= 31)
+                            total_sprites += n;
+                            if (total_sprites >= 31)
                             {
-                                all_sprites[i].sprite = -1;
-                                all_sprites[i].state = OFF_SCREEN;
-                                all_sprites[i].enable = false;
-                                sprite -= n;
+                                total_sprites -= n;
                                 sprintf(title, "TOO MANY SPRITES!");
                                 vprint(title, 13);
                                 break;
@@ -343,21 +303,20 @@ void main()
                     } // if enable
                 } // if jet
 
+                // ***************************
+                // add men / chutes
+                // ***************************
                 if (all_sprites[i].sprite_type == SPRITE_TYPE_MAN)
                 {
                     /* ADD MAN SPRITES */
                     if (all_sprites[i].enable)
                     {
                         wave_done = false;
-                        n = parachuter(sprite, &all_sprites[i]);
-                        all_sprites[i].sprite = sprite;
-                        sprite += n;
-                        if (sprite >= 31)
+                        n = parachuter(total_sprites, &all_sprites[i]);
+                        total_sprites += n;
+                        if (total_sprites >= 31)
                         {
-                            all_sprites[i].sprite = -1;
-                            all_sprites[i].state = OFF_SCREEN;
-                            all_sprites[i].enable = false;
-                            sprite -= n;
+                            total_sprites -= n;
                             sprintf(title, "TOO MANY SPRITES!");
                             vprint(title, 13);
                             break;
@@ -366,6 +325,9 @@ void main()
                     } // if enable
                 } // if man
 
+                // ***************************
+                // add shots
+                // ***************************
                 if (all_sprites[i].sprite_type == SPRITE_TYPE_SHOT)
                 {
                     if (all_sprites[i].enable)
@@ -374,19 +336,15 @@ void main()
                         if (all_sprites[i].state == ON_SCREEN)
                         {
                             wave_done = false;
-                            // sprintf(title, "SHOT! (%d,%d) sprite %d", shot_sprites[i].x, shot_sprites[i].y, sprite);
+                            // sprintf(title, "SHOT! (%d,%d) sprite %d", all_sprites[i].x, all_sprites[i].y, sprite);
                             // vprint(title, 4);
-                            n = shot(sprite, &all_sprites[i]);
-                            all_sprites[i].sprite = sprite;
+                            n = shot(total_sprites, &all_sprites[i]);
 
                             // emergency_stop = 1;
-                            sprite += n;
-                            if (sprite >= 31)
+                            total_sprites += n;
+                            if (total_sprites >= 31)
                             {
-                                sprite -= n;
-                                all_sprites[i].sprite = -1;
-                                all_sprites[i].enable = false;
-                                all_sprites[i].state = OFF_SCREEN;
+                                total_sprites -= n;
                                 sprintf(title, "TOO MANY SPRITES!");
                                 vprint(title, 13);
                                 break;
@@ -396,6 +354,9 @@ void main()
                     } // if enable
                 } // if shot
 
+                // ***************************
+                // add bombs
+                // ***************************
                 if (all_sprites[i].sprite_type == SPRITE_TYPE_BOMB)
                 {
                     /* ADD BOMB SPRITES */
@@ -404,16 +365,13 @@ void main()
                         if (all_sprites[i].state == ON_SCREEN)
                         {
                             wave_done = false;
-                            n = bomb(sprite, &all_sprites[i]);
-                            all_sprites[i].sprite = sprite;
+                            n = bomb(total_sprites, &all_sprites[i]);
 
-                            sprite += n;
-                            if (sprite >= 31)
+                            total_sprites += n;
+                            if (total_sprites >= 31)
                             {
-                                sprite -= n;
-                                all_sprites[i].sprite = -1;
-                                all_sprites[i].enable = false;
-                                all_sprites[i].state = OFF_SCREEN;
+                                total_sprites -= n;
+
                                 sprintf(title, "TOO MANY SPRITES!");
                                 vprint(title, 13);
                                 break;
@@ -491,9 +449,14 @@ void main()
 
                             if (man < 32)
                             {
+                                int char_x;
+                                
+                                char_x = (int)((all_sprites[i].x) / 8) * 8 ;
+
                                 all_sprites[man].sprite_type = SPRITE_TYPE_MAN;
                                 all_sprites[man].enable = true;
-                                all_sprites[man].x = all_sprites[i].x + 8;
+                                // man needs to fall on a character boundary
+                                all_sprites[man].x = char_x - 4;
                                 all_sprites[man].y = set_y(all_sprites[i].y + 16);
                                 all_sprites[man].state = JUMPED;
                             }
@@ -547,6 +510,8 @@ void main()
                                 all_sprites[bomb].enable = true;
                                 all_sprites[bomb].x = all_sprites[i].x + 8;
                                 all_sprites[bomb].y = set_y(all_sprites[i].y + 16);
+                                all_sprites[bomb].inc_x = all_sprites[i].inc_x > 0 ? 1 : -1;
+                                all_sprites[bomb].inc_y = 3;
                                 all_sprites[bomb].state = DROPPED;
                             }
                         } // if add_bomb
@@ -556,22 +521,61 @@ void main()
 
             add_sprite = 0;
 
+            if (display_debug)
+                if (run_count >= stop_at)
+                {
+                    vprint("Checking collision", 6);
+                }
 
             // ******************************************************
             // *** COLLISION DETECTION
             // ******************************************************
             for (int i=0; i<32; i++)
             {
-                if (all_sprites[i].sprite_type != SPRITE_TYPE_SHOT)
-                    continue;
-
-                if (all_sprites[i].state == ON_SCREEN)
+                if (display_debug)
                 {
-                    sprite_collision = collision_detect(all_sprites[i].sprite, all_sprites);
-                    if (sprite_collision != OFF_SCREEN)
+                    if (run_count >= stop_at)
                     {
-
+                        char temp[80];
+                        identify_sprite(all_sprites[i].sprite_type, temp);
+                        sprintf(title, "i:%02d %s", i, temp);
+                        vprint(title, 3);
                     }
+                }
+                if (all_sprites[i].sprite_type != SPRITE_TYPE_SHOT)
+                {
+                    continue;
+                }
+                if (display_debug)
+                    if (run_count >= stop_at)
+                        vprint("shot", 4);
+
+                if (all_sprites[i].enable)
+                {
+                    if (display_debug)
+                        if (run_count >= stop_at)
+                            vprint("enable", 4);
+
+                    if (all_sprites[i].state == ON_SCREEN)
+                    {
+                        if (display_debug)
+                            if (run_count >= stop_at)
+                                vprint("on screen", 5);
+
+                        sprite_collision = collision_detect(i, all_sprites, display_debug && (run_count >= stop_at));
+                        if (sprite_collision != NO_COLLISION)
+                        {
+                            char temp[80];
+                            identify_sprite(all_sprites[sprite_collision].sprite_type, temp);
+
+                            if (display_debug)
+                            {
+                                sprintf(title, "COLLISION WITH %d %s", sprite_collision, temp);
+                                vprint(title, 6);
+                                mygetchar();
+                            }
+                        } 
+                   }
                 }
             
             }
@@ -596,7 +600,7 @@ void main()
                     if (all_sprites[i].state <= JUMPED3)
                         all_sprites[i].state++;
 
-                    if (all_sprites[i].y > BOTTOM_SCREEN_Y - 16)
+                    if (all_sprites[i].y > BOTTOM_SCREEN_Y - 16 - 2)
                     {
                         all_sprites[i].enable = false;
                         all_sprites[i].state = OFF_SCREEN;
@@ -605,9 +609,9 @@ void main()
                         all_sprites[i].y = set_y(all_sprites[i].y + 8);
 
                         // replace the man sprite with a man character
-                        char_x = all_sprites[i].x / 8;
-                        char_y = all_sprites[i].y / 8;
-                        vpoke(VRAM_NAME_TABLE + char_y * total_columns + char_x + 1, CHAR_MAN);
+                        char_x = all_sprites[i].x / 8 + 1;
+                        char_y = total_rows - 1;
+                        vpoke(VRAM_NAME_TABLE + char_y * total_columns + char_x, CHAR_MAN);
                     }
                 } // if man
 
@@ -711,6 +715,7 @@ void main()
                             else
                                 all_sprites[i].x += all_sprites[i].inc_x;
                             all_sprites[i].y += all_sprites[i].inc_y;
+                            all_sprites[i].inc_y += 1;
                         }
                     }
                 } // if bomb
@@ -753,16 +758,19 @@ void main()
 
                     if (shot < 32)
                     {
+                        all_sprites[shot].sprite_type = SPRITE_TYPE_SHOT;
                         all_sprites[shot].enable = true;
                         all_sprites[shot].x = shot_angle[rotation].x;
                         all_sprites[shot].y = shot_angle[rotation].y;
                         all_sprites[shot].inc_x = shot_angle[rotation].inc_x;
                         all_sprites[shot].inc_y = shot_angle[rotation].inc_y;
                         all_sprites[shot].state = ON_SCREEN;
-                        all_sprites[shot].sprite = -1;
+                        //sprintf(title, "%02d shot", shot);
+                        //vprint(title, 2);
                     }
                     fire = 0;
                 } // if fire
+               
             } // for
 
         } // while true   

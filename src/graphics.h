@@ -12,9 +12,7 @@
 void clr(unsigned char c);
 void vprint(char *message, int line);
 void mode_text(void);
-void mode_text2(void);
 void mode_graphics_ii(void);
-void mode_graphics_ii2(void);
 
 extern int total_columns;
 extern int total_rows;

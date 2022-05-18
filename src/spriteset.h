@@ -43,6 +43,7 @@
 
 #define SPRITE_TERMINATOR   208
 
+#define SPRITE_TYPE_NONE       0
 #define SPRITE_TYPE_SHOT       1
 #define SPRITE_TYPE_CHUTE      2
 #define SPRITE_TYPE_MAN        3
@@ -68,7 +69,7 @@ typedef struct
 typedef struct
 {
     int enable;
-    int sprite;
+    int sprite_num; 
     int state;
     int flip;
     int inc_x;
@@ -81,6 +82,7 @@ typedef struct
     int going_left;
     int jump_wait;
     int appearance_wait;
+    int disappearance_wait;
     int jumpers;
     int bombs;
     int sprite_type;
