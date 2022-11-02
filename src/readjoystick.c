@@ -11,10 +11,10 @@ static unsigned char keypad = 0;
 #define READ_CONTROLLER_2 2
 #define READ_SPINNER      128
 
-#define UP    1
-#define RIGHT 2
-#define DOWN  4
-#define LEFT  8
+#define UP    (1)
+#define RIGHT (2)
+#define DOWN  (4)
+#define LEFT  (8)
 
 int read_joystick(int rotation)
 {

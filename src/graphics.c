@@ -63,18 +63,18 @@ void mode_text(void)
     r7.background_color = COLOR_BLACK;
     r7.foreground_color = COLOR_WHITE;
 
-    eos_write_vdp_register(1, r1.reg1);
+    eos_write_vdp_register(1, r1.value);
 
-    eos_write_vdp_register(0, r0.reg0);
-    
-    eos_write_vdp_register(2, r2.reg2);
-    eos_write_vdp_register(4, r4.reg4);
-    eos_write_vdp_register(7, r7.reg7);
+    eos_write_vdp_register(0, r0.value);
+
+    eos_write_vdp_register(2, r2.value);
+    eos_write_vdp_register(4, r4.value);
+    eos_write_vdp_register(7, r7.value);
 
     eos_write_vram(256 * 8, VRAM_GENERATOR_TABLE, character_set);
 
     r1.Show_screen = 1; // display our new settings
-    eos_write_vdp_register(1, r1.reg1);
+    eos_write_vdp_register(1, r1.value);
 
     total_columns = 40;
     total_rows = 24;
@@ -118,7 +118,7 @@ void mode_graphics_i(void)
     r1.Sprite_16x16_enable = 0;
     r1.Magnify_sprite = 0;
 
-    eos_write_vdp_register(1, r1.reg1); // blank the display
+    eos_write_vdp_register(1, r1.value); // blank the display
 
     r2.Base_address_of_name_table = VRAM_NAME_TABLE / 0x400;
     r3.Base_address_of_color_table = VRAM_COLOR_TABLE / 0x040;
@@ -142,15 +142,15 @@ void mode_graphics_i(void)
 
     eos_write_vram(32 * 8, VRAM_SPRITE_GENERATOR_TABLE, sprites);
 
-    eos_write_vdp_register(2, r2.reg2);
-    eos_write_vdp_register(3, r3.reg3);
-    eos_write_vdp_register(4, r4.reg4);
-    eos_write_vdp_register(5, r5.reg5);
-    eos_write_vdp_register(6, r6.reg6);
+    eos_write_vdp_register(2, r2.value);
+    eos_write_vdp_register(3, r3.value);
+    eos_write_vdp_register(4, r4.value);
+    eos_write_vdp_register(5, r5.value);
+    eos_write_vdp_register(6, r6.value);
     // eos_write_vdp_register(7, r7.reg7);
 
     r1.Show_screen = 1; // show display
-    eos_write_vdp_register(1, r1.reg1);
+    eos_write_vdp_register(1, r1.value);
 
     total_columns = 32;
     total_rows = 24;
@@ -207,18 +207,18 @@ void mode_graphics_ii(void)
     */
 
     // Graphics mode 2  M1=0, M2=0, M3=1
-    r0.M3 = 1;
-    r0.enable_VDP_input = 0;
+    r0.M3                  = 1;
+    r0.enable_VDP_input    = 0; 
 
-    r1.M1 = 0;
-    r1.M2 = 0;
-    r1.RAM_16K = 1;         // This is a 16K graphics chip
-    r1.Show_screen = 0;     // don't display anything until everything is set
-    r1.Interrupt_enable = 0;
-    r1.Sprite_16x16_enable = 0;
-    r1.Magnify_sprite = 0;
+    r1.M1                  = 0;
+    r1.M2                  = 0;
+    r1.RAM_16K             = 1;     // This is a 16K graphics chip
+    r1.Show_screen         = 0;     // don't display anything until everything is set
+    r1.Interrupt_enable    = 1;     //
+    r1.Sprite_16x16_enable = 0;     // Sprites are only 8x8
+    r1.Magnify_sprite      = 0;     // No need to make them twice normal size
 
-    eos_write_vdp_register(1, r1.reg1); // blank the display
+    eos_write_vdp_register(1, r1.value); // blank the display while we set up registers
 
     r2.Base_address_of_name_table             = VRAM_NAME_TABLE / 0x400;
     r3.Base_address_of_color_table            = VRAM_COLOR_TABLE / 0x040;
@@ -252,16 +252,21 @@ void mode_graphics_ii(void)
 
     eos_write_vram(32 * 8, VRAM_SPRITE_GENERATOR_TABLE, sprites);
 
-    eos_write_vdp_register(2, r2.reg2);
-    eos_write_vdp_register(3, r3.reg3);
-    eos_write_vdp_register(4, r4.reg4);
-    eos_write_vdp_register(5, r5.reg5);
-    eos_write_vdp_register(6, r6.reg6);
+    eos_write_vdp_register(2, r2.value);
+    eos_write_vdp_register(3, r3.value);
+    eos_write_vdp_register(4, r4.value);
+    eos_write_vdp_register(5, r5.value);
+    eos_write_vdp_register(6, r6.value);
     //eos_write_vdp_register(7, r7.reg7);
 
     r1.Show_screen = 1; // show display
-    eos_write_vdp_register(1, r1.reg1);
-    
+    eos_write_vdp_register(1, r1.value);
+
     total_columns = 32;
     total_rows = 24;
+
+    //char temp[80];
+    //sprintf(temp, "%02x ", r1.reg1);
+    //vprintf(temp, 0);
+    //getchar();
 }

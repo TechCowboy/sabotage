@@ -7,6 +7,7 @@
 #include "colorset.h" 
 #include "charset.h"
 #include "misc.h"
+#include "vdp_registers.h"
 
 extern char title[];
 
@@ -133,26 +134,32 @@ void end_game()
 
 void test_char_color(void)
 {
-    char message[] = { "12345678901234567890123456789012"};
-    char temp[80];
+    TMS_REGISTER_3 r3;
+    char message[] = {"12345678901234567890123456789012"};
 
-    mode_graphics_ii();
+    r3.Base_address_of_color_table = VRAM_COLOR_TABLE / 0x040;
+    set_vdp(3,r3.value);
 
     unsigned short addr = mode_ii_color_set;
     int length = 8 * 256;
-    memset(addr, SHIFTED_COLOR_DARK_RED     | COLOR_DARK_GREEN, length);
+    int size = 0;
+
+    memset(addr, SHIFTED_COLOR_WHITE     | COLOR_BLACK, length);
+    size += length;
     addr += length;
-    memset(addr, SHIFTED_COLOR_DARK_GREEN   | COLOR_DARK_RED,   length);
+
+    memset(addr, SHIFTED_COLOR_LIGHT_YELLOW | COLOR_BLACK,      length);
+    size += length;
     addr += length;
+
     memset(addr, SHIFTED_COLOR_LIGHT_YELLOW | COLOR_GRAY,       length);
-    
-    addr = VRAM_COLOR_TABLE;
-    eos_write_vram(length*3, addr, mode_ii_color_set);
+    size += length;
+    addr += length;
+
+    eos_write_vram(size, VRAM_COLOR_TABLE, mode_ii_color_set);
 
     for(int line=0; line<23; line++)
-    {
         vprint(message, line);
-    }
 
     mygetchar();
 

@@ -5,18 +5,18 @@ typedef union _TMS_REGISTER_0
 {
     struct
     {
-        unsigned char enable_VDP_input : 1; // Bit 0
+        unsigned char enable_VDP_input : 1; // Bit 0 | TMS Bit 7
         unsigned char M3 : 1;               // Bit 1
         unsigned char unused : 6;           // Bit 2,3,4,5,6,7
     };
-    unsigned char reg0;
+    unsigned char value;
 } TMS_REGISTER_0;
 
 typedef union _TMS_REGISTER_1
 {
     struct
     {
-        unsigned char Magnify_sprite : 1;      // 0
+        unsigned char Magnify_sprite : 1;      // 0 Bit | TMS Bit 7
         unsigned char Sprite_16x16_enable : 1; // 1
         unsigned char reserved : 1;            // 2
         unsigned char M2 : 1;                  // 3
@@ -25,7 +25,7 @@ typedef union _TMS_REGISTER_1
         unsigned char Show_screen : 1;         // 6
         unsigned char RAM_16K : 1;             // 7
     };
-    unsigned char reg1;
+    unsigned char value;
 } TMS_REGISTER_1;
 
 typedef union _TMS_REGISTER_2
@@ -35,7 +35,7 @@ typedef union _TMS_REGISTER_2
         // R2 * 0x400 = Base address of name table
         unsigned char Base_address_of_name_table;
     };
-    unsigned char reg2;
+    unsigned char value;
 } TMS_REGISTER_2;
 
 typedef union _TMS_REGISTER_3
@@ -45,7 +45,7 @@ typedef union _TMS_REGISTER_3
         // R3 * 0x40 = Base address of color table
         unsigned char Base_address_of_color_table;
     };
-    unsigned char reg3;
+    unsigned char value;
 } TMS_REGISTER_3;
 
 typedef union _TMS_REGISTER_4
@@ -55,7 +55,7 @@ typedef union _TMS_REGISTER_4
         // R4 * 0x800 = Base address of generator table
         unsigned char Base_address_of_generator_table;
     };
-    unsigned char reg4;
+    unsigned char value;
 } TMS_REGISTER_4;
 
 typedef union _TMS_REGISTER_5
@@ -65,7 +65,7 @@ typedef union _TMS_REGISTER_5
         // R5 * 0x80 = Base address sprite attribute table
         unsigned char Base_address_of_sprite_attribute_table;
     };
-    unsigned char reg5;
+    unsigned char value;
 } TMS_REGISTER_5;
 
 typedef union _TMS_REGISTER_6
@@ -75,17 +75,17 @@ typedef union _TMS_REGISTER_6
         // R6 * 0x800 = Base address sprite generator table
         unsigned char Base_address_of_sprite_generator_table;
     };
-    unsigned char reg6;
+    unsigned char value;
 } TMS_REGISTER_6;
 
 typedef union _TMS_REGISTER_7
 {
     struct
     {
-        unsigned char background_color : 4; // background
-        unsigned char foreground_color : 4; // 7,6,5,4
+        unsigned char background_color : 4; // background 0,1,2,3
+        unsigned char foreground_color : 4; // foreground 4,5,6,7
     };
-    unsigned char reg7;
+    unsigned char value;
 } TMS_REGISTER_7;
 
 typedef union _TMS_STATUS
@@ -96,8 +96,8 @@ typedef union _TMS_STATUS
         unsigned char coincidence_flag : 1;
         unsigned char fifth_sprite     : 5
     };
-    unsigned char status;
-    
+    unsigned char value;
+
 } TMS_STATUS;
 
 // Registers 0 through 7 are Write Only

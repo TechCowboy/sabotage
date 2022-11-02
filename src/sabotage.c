@@ -86,7 +86,7 @@ void main()
     /******** INIT ******************/
 
     //sound_init();
-    init_keyboard();
+    //init_keyboard();
     
     for(int i=0; i<32; i++)
     {
@@ -107,10 +107,12 @@ void main()
     answer = introduction();
     steerable = ((answer == 'Y') || (answer == 'y'));
 
-    test_char_color();
 
+    
     mode_graphics_ii();
     clr(' ');
+    test_char_color();
+    getchar();
 
     create_text_ground();
     create_text_turret(rotation);
